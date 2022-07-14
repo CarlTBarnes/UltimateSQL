@@ -8,7 +8,7 @@ _UltimateDBPresent_      EQUATE(1)
 !-----------------------------------------------------------------------
 ! Miscellaneous definitions required by class
 !-----------------------------------------------------------------------
-roList              QUEUE, TYPE                 ! List of readonly fields
+roDBList              QUEUE, TYPE                 ! List of readonly fields
 Fieldname             CSTRING(129)
                     END
 !
@@ -19,7 +19,7 @@ UltimateDB               CLASS,MODULE('UltimateDB.clw'),TYPE,LINK('UltimateDB.cl
 !---------------------------------------
 ! Private and protected properties
 !---------------------------------------
-roQ                   &roList, PRIVATE          ! Queue of readonly fields
+roQ                   &roDBList, PRIVATE          ! Queue of readonly fields
 CallError             BYTE, PRIVATE             ! T = SQLCall or SQLCallReturn error was encountered
 
 Error                 CSTRING(500),PROTECTED    ! Error message
@@ -75,7 +75,7 @@ SQLInsert                       PROCEDURE(*FILE pTbl, BYTE pIncludePK=False), ST
 SQLList                         PROCEDURE(*KEY pKey, <STRING pSelect>, BYTE pReverse=False)
 SQLLog                          PROCEDURE(*FILE pTbl, <STRING pLogfile>)
 SQLReverseChildren              PROCEDURE(*KEY pKey, <STRING pSelect>)
-SQLUpdate                       PROCEDURE(*FILE pTbl), BYTE, PROC
+SQLUpdate                       PROCEDURE(*FILE pTbl), STRING, PROC
 
 !---------------------------------------
 ! Private and protected methods

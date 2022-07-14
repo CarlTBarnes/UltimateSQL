@@ -16,6 +16,7 @@
     INCLUDE('ultimatedebug.inc')
 
 
+ud                              UltimateDebug
 
 ! -----------------------------------------------------------------------
 !!! <summary>Add to list of read only fields</summary>
@@ -42,7 +43,7 @@ UltimateDB.AddReadOnly                  PROCEDURE(<STRING pFieldname>)
 ! -----------------------------------------------------------------------
 UltimateDB.Construct                    PROCEDURE()
     CODE
-    SELF.roQ       &=  NEW(roList)
+    SELF.roQ       &=  NEW(roDBList)
     SELF._Column    =  1
     SELF._Separator =  '<13,10>'
 
@@ -315,7 +316,7 @@ curReturn                                   UltimateSQLString
     OROF 'STRING'
         IF curData |
             OR ~curNull
-            curReturn.Assign(curData)
+            curReturn.Assign(CLIP(curData))
             curReturn.Quote(curDriver)
         ELSE
             curReturn.Assign('NULL')
@@ -344,7 +345,7 @@ curReturn                                   UltimateSQLString
             curReturn.Assign('NULL')
         END
     END
-    RETURN curReturn.Get()
+    RETURN CLIP(curReturn.Get())
 
 
 ! -----------------------------------------------------------------------
@@ -438,16 +439,23 @@ UltimateDB.Get_ColName                  PROCEDURE(*FILE pTbl, LONG pInstance)
 
 curColLength                                LONG, AUTO
 curColName                                  UltimateSQLString
+PrefixSeparator                             LONG
+ColumnName                                  STRING(200)
+
 
     CODE
-    curColName.Assign(UPPER(pTbl{PROP:Name, pInstance}))
+    curColName.Assign(pTbl{PROP:Name, pInstance})
     IF curColName.Length() = 0
-        curColName.Assign(UPPER(pTbl{PROP:Label, pInstance}))
+        ColumnName = pTbl{PROP:Label, pInstance}
+        PrefixSeparator = INSTRING(':',ColumnName,1,1)+1
+        curColName.Assign(CLIP(SUB(ColumnName,PrefixSeparator,200)))
+    ELSE
+        IF curColName.Left(1) = '"'
+            curColLength =  curColName.Length() - 2
+            curColName.Assign(SUB(curColName.Get(), 2, curColLength))
+        END
     END
-    IF curColName.Left(1) = '"'
-        curColLength =  curColName.Length() - 2
-        curColName.Assign(SUB(curColName.Get(), 2, curColLength))
-    END
+    
     RETURN curColName.Get()
 
 
@@ -497,8 +505,11 @@ UltimateDB.Quote                        PROCEDURE(STRING pText)
 curReturn                                   UltimateSQLString
 
     CODE
+    ud.DebugOff = FALSE
+    ud.DebugPrefix = '!'
     curReturn.Assign(pText)
     curReturn.Quote(SELF._Driver)
+    ud.debug('== came back ')
     RETURN curReturn.Get()
 
 
@@ -870,7 +881,7 @@ curCol                                      LONG, AUTO
         IF curColNames.Length()
             curColNames.Append(', ')
         END
-        curColNames.Append(SELF.FormatColName(pTbl, curCol, False))
+        curColNames.Append(SELF.FormatColName(pTbl, curCol,FALSE))
         IF curColData.Length()
             curColData.Append(', ')
         END
@@ -1038,7 +1049,7 @@ curCol                                      LONG, AUTO
     LOOP curCol = 1 TO curColCount
         IF curCol = curPK
             curPKName.Assign(SELF.FormatColName(pTbl, curCol))
-            curPKData.Assign(SELF.FormatColData(pTbl, curCol))
+            curPKData.Assign(CLIP(SELF.FormatColData(pTbl, curCol)))
             CYCLE
         END
         IF SELF.IsReadOnly(pTbl, curCol)
@@ -1047,7 +1058,7 @@ curCol                                      LONG, AUTO
         IF curUpdate.Length()
             curUpdate.Append(', ')
         END
-        curUpdate.Append(SELF.FormatColName(pTbl, curCol, False) & '=' & SELF.FormatColData(pTbl, curCol))
+        curUpdate.Append(SELF.FormatColName(pTbl, curCol, False) & '=' & CLIP(SELF.FormatColData(pTbl, curCol)))
     END
   !---------------------------------------
   ! Extract blob names and values
@@ -1060,14 +1071,14 @@ curCol                                      LONG, AUTO
         IF curUpdate.Length()
             curUpdate.Append(', ')
         END
-        curUpdate.Append(SELF.FormatColName(pTbl, -curCol, False) & '=' & SELF.FormatColData(pTbl, -curCol))
+        curUpdate.Append(SELF.FormatColName(pTbl, -curCol, False) & '=' & CLIP(SELF.FormatColData(pTbl, -curCol)))
     END
   !---------------------------------------
   ! Update requested table
-  !---------------------------------------
-    pTbl{PROP:SQL} =  'UPDATE ' & pTbl{PROP:Name} & ' SET ' & curUpdate.Get() & ' WHERE ' & curPKName.Get() & '=' & curPKData.Get()
-    IF ERRORCODE()
-        RETURN False
-    ELSE
-        RETURN True
-    END
+    !---------------------------------------                                                                              
+    RETURN 'UPDATE ' & pTbl{PROP:Name} & ' SET ' & curUpdate.Get() & ' WHERE ' & curPKName.Get() & '=' & curPKData.Get()
+!    IF ERRORCODE()
+!        RETURN False
+!    ELSE
+!        RETURN True
+!    END
