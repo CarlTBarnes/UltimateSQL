@@ -1,4 +1,4 @@
-#EXTENSION(UltimateSQL, 'Ultimate SQL (Global Extension)'),APPLICATION(ProcedureInfoExtension)
+#EXTENSION(UltimateSQL, 'UltimateSQL (Global Extension)'),Description('UltimateSQL, ' & %UltimateSQLTPLVersion & ' - Object ' & %CLSkelClass & '; Driver ' & %SQLDriver),MULTI,APPLICATION(ProcedureInfoExtension)
 #PREPARE
   #INSERT(%CalcFamily, %CLSkelFamily)
 #ENDPREPARE
@@ -9,31 +9,80 @@
 #SHEET,HSCROLL
 #TAB('General')
   #DISPLAY
-  #PROMPT('Global Class:',@S40),%CLSkelClass,AT(90,,95,10),REQ,DEFAULT('SQL')
-  #PROMPT('Multi DLL',CHECK),%CLSkelMultiDLL,AT(90),DEFAULT(0)
+  #PROMPT('Global Object:',@S40),%CLSkelClass,REQ,DEFAULT('SQL')   
+  #PROMPT('Multi-DLL',CHECK),%CLSkelMultiDLL,DEFAULT(0)
   #ENABLE(%CLSkelMultiDLL=1),ClEAR
-    #PROMPT('Declaration:',DROP('Declared in another App[0]|Declared in this app[1]')),%CLSkelMultiDLLData,DEFAULT(0),AT(90,,95,10)
-  #ENDENABLE 
-  #DISPLAY
-  #PROMPT('Prompt For Connection',CHECK),%PromptToConnect,AT(90),DEFAULT(0)  
-  #DISPLAY
-  #PROMPT('Query Table Name',@S60),%QueryTable,AT(90),DEFAULT('Queries') 
-  #DISPLAY
-  #BOXED
-  #DISPLAY('Debug Settings')
-  #PROMPT('Prefix:',@S20),%CLDebugPrefix,AT(90),DEFAULT('!')
-  #PROMPT('Log File Name:',@S120),%CLLogFileName,AT(90),DEFAULT('DebugLog.txt') 
+    #PROMPT('Declaration:',DROP('Declared in another App[0]|Declared in this app[1]')),%CLSkelMultiDLLData,DEFAULT(0)
+  #ENDENABLE   
+ #BOXED,WHERE(%ProgramExtension = 'EXE')
+  #PROMPT('File Driver',Drop('MS_SQL|ODBC|SQLite')),%SQLDriver,DEFAULT('MS_SQL')
+  #BOXED,WHERE(%SQLDriver<>'SQLite'),AT(,86)
+    #PROMPT('Application Name',EXPR),%ApplicationName
+    #PROMPT('WSID (local computer name)',EXPR),%WSID 
   #ENDBOXED
+  #BOXED,WHERE(%SQLDriver='SQLite'),AT(,86)
+    #PROMPT('SQLite Database Type',OPTION),%SQLiteDatabaseType,DEFAULT('Disk')
+    #PROMPT('In-Memory',RADIO)
+    #PROMPT('Disk',RADIO)    
+    #BOXED(''),WHERE(%SQLiteDatabaseType='Disk')
+      #PROMPT('SQLite Filename',EXPR),%SQLiteDatabaseFile
+    #ENDBOXED
+  #ENDBOXED
+  #BOXED,WHERE(%SQLDriver='HIDDEN'),AT(,110)
+    #PROMPT('Require SQL Native Client (recommended)',CHECK),%RequireNativeClient,DEFAULT(1),AT(10) 
+  #ENDBOXED
+  #DISPLAY 
+  #BOXED('SQLite In-Memory Settings'),WHERE(%SQLDriver = 'SQLite' AND %SQLiteDatabaseType = 'In-Memory'),AT(,130) 
+    #PROMPT('Global In-Memory Database',EXPR),%SQLiteGlobalInMemoryDatabase,DEFAULT('SQLiteGlobalInMemoryDatabase')
+  #ENDBOXED
+  #BOXED('MSSQL Settings'),WHERE(%SQLDriver = 'MS_SQL'),AT(,110) 
+    #BOXED,WHERE(%SQLDriver='HIDDEN'),AT(,110)
+      #PROMPT('Access Type',DROP('SQL Native Client|None')),%OLEDBDriver,DEFAULT('SQL Native Client') 
+    #ENDBOXED  
+    #DISPLAY('An SQL Native Client is required.')
+    #PROMPT('Silent Install',CHECK),%SilentInstall
+    #ENABLE(%SilentInstall)
+      #PROMPT('64 Bit msi file (full path)',EXPR),%NCInstaller64Bit
+    #ENDENABLE  
+    #DISPLAY
+  #ENDBOXED
+  #BOXED('ODBC Settings'),WHERE(%SQLDriver = 'ODBC'),AT(,110)
+    #PROMPT('ODBC Driver',EXPR),%ODBCDriver,DEFAULT('''ODBC Driver 17 for SQL Server''')
+    #PROMPT('Silent Install',CHECK),%SilentInstall
+    #ENABLE(%SilentInstall)
+      #PROMPT('64 Bit msi file (full path)',EXPR),%Installer64Bit
+    #ENDENABLE  
+    #DISPLAY
+  #ENDBOXED
+  #DISPLAY  
+  #BOXED('Connection'),WHERE(%SQLDriver = 'ODBC' OR %SQLDriver = 'MS_SQL')
+    #PROMPT('Define Connection In The Template',CHECK),%PromptToConnect,DEFAULT(0),AT(10)
+    #PROMPT('Use Registry For Server Loading (Fast)',CHECK),%UseRegistryForServerLoading,DEFAULT(1),AT(10)
+  #ENDBOXED
+  #BOXED('Debug Settings')
+    #PROMPT('Prefix:',EXPR),%CLDebugPrefix,DEFAULT('!')
+    #PROMPT('Log File Name:',EXPR),%CLLogFileName,DEFAULT('DebugLog.txt') 
+  #ENDBOXED
+  #BOXED('Optional'),WHERE(%SQLDriver <> 'SQLite')
+    #PROMPT('Global Dynamic Queue Object:',EXPR),%GlobalFieldClass,DEFAULT('') 
+    #DISPLAY(' *Only necessary if using Dynamically created Queues')
+  #ENDBOXED
+ #ENDBOXED
   #INSERT(%TabCopyright)
   #ENDTAB
-  #TAB('Connection Info'),WHERE(%PromptToConnect)
-  #PROMPT('Connection (String/Var)',@S60),%ConnectionString
-  #PROMPT('Server (String/Var)',@S60),%ServerString
-  #PROMPT('UserName (String/Var)',@S60),%UserNameString
-  #PROMPT('Password (String/Var)',@S60),%PasswordString
-  #PROMPT('Database (String/Var)',@S60),%DatabaseString
-  #PROMPT('Trusted Connection (Byte/Var)',@S60),%TrustedByte
-#ENDTAB  
+  #TAB('Connection Info'),WHERE(%SQLDriver <> 'SQLite' AND %PromptToConnect AND %ProgramExtension = 'EXE')   
+    #BOXED('Connection'),WHERE(%SQLDriver = 'ODBC' OR %SQLDriver = 'MS_SQL')
+      #PROMPT('Connection (String/Var)',EXPR),%ConnectionString
+      #PROMPT('Server (String/Var)',EXPR),%ServerString
+      #PROMPT('UserName (String/Var)',EXPR),%UserNameString
+      #PROMPT('Password (String/Var)',EXPR),%PasswordString
+      #PROMPT('Database (String/Var)',EXPR),%DatabaseString
+      #PROMPT('Trusted Connection (Byte/Var)',EXPR),%TrustedByte 
+      #DISPLAY
+      #PROMPT('Skip Connection Prompt (I''ll handle this myself)',CHECK),%SkipConnectionPrompt,DEFAULT(0),AT(10)
+    #ENDBOXED     
+  #ENDTAB            
+#INSERT(%TabInMemorySupport)  
 #INSERT(%TabProcedureInfo)
 #INSERT(%TabDefaults)
 #INSERT(%TabInstructions)
@@ -42,15 +91,14 @@
 #ENDSHEET
 #DISPLAY
 #DISPLAY
-#PROMPT('Disable template',CHECK),%CLSkelAppDisable,AT(10),DEFAULT(0)
+#PROMPT('Disable template',CHECK),%CLSkelAppDisable,AT(10),DEFAULT(0)     
 
 #ATSTART          
-  #DECLARE(%ThisApplicationExtension)
   #DECLARE(%CLSkelDataExternal)
   #IF(%CLSkelMultiDLL=1 AND %CLSkelMultiDLLData=0)
     #SET(%CLSkelDataExternal,',EXTERNAL,DLL(dll_mode)')
-  #ENDIF
-  
+  #ENDIF 
+  #SET(%OLEDBDriver,'SQL Native Client') 
 #ENDAT
 
 #AT(%AfterGlobalIncludes),WHERE(~%CLSkelAppDisable)
@@ -61,101 +109,208 @@
   #INSERT(%CalcFamily, %CLSkelFamily)
   #IF(%CLSkelFamily='LEGACY')
   #PROJECT('UltimateSQL.CLW')
-  #ENDIF  
-  %#pragma link ("C%%V%%MSS%%X%%%%L%%.LIB")
+  #ENDIF 
+   #FIX(%Driver,'MsSql')
+   #PROJECT(%DriverLib)
+   #FIX(%Driver,'SQLite')
+   #PROJECT(%DriverLib)
+   #FIX(%Driver,'ODBC')
+   #PROJECT(%DriverLib)
 #ENDAT
 
+
+    
+#AT(%AfterFileDeclarations),WHERE(NOT %CLSkelAppDisable AND %SQLDriver = 'SQLite' AND  %SQLiteDatabaseType = 'In-Memory'),PRIORITY(1000)    
+#IF(%CLSkelMultiDLL=1 AND %CLSkelMultiDLLData=0)
+%SQLiteGlobalInMemoryDatabase    FILE,DRIVER('SQLite','/TURBOSQL=True'),PRE(%SQLiteGlobalInMemoryDatabase),BINDABLE,THREAD,EXTERNAL(''),DLL(dll_mode) 
+Record                              RECORD,PRE()
+Field1                                  STRING(1)
+                                    END   
+                                END  
+#ELSE
+%SQLiteGlobalInMemoryDatabase    FILE,DRIVER('SQLite','/TURBOSQL=True'),OWNER(':memory:'),PRE(%SQLiteGlobalInMemoryDatabase),BINDABLE,THREAD,CREATE
+Record                              RECORD,PRE()
+Field1                                  STRING(1)
+                                    END   
+                                END
+#ENDIF                                
+#ENDAT 
+
+#AT(%DLLExportList),WHERE(%CLSkelMultiDLL=1 AND %CLSkelMultiDLLData=1 AND ~%CLSkelAppDisable AND %SQLDriver = 'SQLite' AND %SQLiteDatabaseType = 'In-Memory')
+  $%SQLiteGlobalInMemoryDatabase      @?  
+  %SQLiteGlobalInMemoryDatabase$%SQLiteGlobalInMemoryDatabase:RECORD @?
+  %SQLiteGlobalInMemoryDatabase$TYPE$%SQLiteGlobalInMemoryDatabase:RECORD @?
+#ENDAT
+
+#AT(%AfterEntryPointCodeStatement),WHERE(NOT %CLSkelAppDisable AND %SQLDriver = 'SQLite' AND %SQLiteDatabaseType = 'In-Memory'),PRIORITY(100) 
+OPEN(%SQLiteGlobalInMemoryDatabase)
+#ENDAT
+
+
+    
+    
 #AT(%GlobalData),WHERE(~%CLSkelAppDisable)
-UltimateSQL_TPLVersion      CSTRING('v%UltimateSQLTPLVersion')%CLSkelDataExternal
-us_ServerString             STRING(200)%CLSkelDataExternal
-us_UserNameString           STRING(200)%CLSkelDataExternal
-us_PasswordString           STRING(200)%CLSkelDataExternal
-us_DatabaseString           STRING(200)%CLSkelDataExternal
-us_TrustedByte              BYTE(0)%CLSkelDataExternal
+%CLSkelClass_UltimateSQL_Driver          BYTE(1)%CLSkelDataExternal
+%CLSkelClass_UltimateSQL_Properties      STRING(200)%CLSkelDataExternal
+%CLSkelClass_us_ServerString             STRING(200)%CLSkelDataExternal
+%CLSkelClass_us_UserNameString           STRING(200)%CLSkelDataExternal
+%CLSkelClass_us_PasswordString           STRING(200)%CLSkelDataExternal
+%CLSkelClass_us_DatabaseString           STRING(200)%CLSkelDataExternal
+%CLSkelClass_us_TrustedByte              BYTE(0)%CLSkelDataExternal  
+
 %CLSkelClass         CLASS(UltimateSQL)%CLSkelDataExternal
-                     END
+                     END 
+                     
+  #IF(%GlobalFieldClass <> '')    
+%GlobalFieldClass    CLASS(ctFieldQ),THREAD%CLSkelDataExternal
+                     END  
+  #ENDIF                   
 #ENDAT
 
 #AT(%DLLExportList),WHERE(%CLSkelMultiDLL=1 AND %CLSkelMultiDLLData=1 AND ~%CLSkelAppDisable)
-  $UltimateSQL_TPLVersion  @?
-  $%CLSkelClass            @? 
-  $us_ServerString         @?             
-  $us_UserNameString       @?           
-  $us_PasswordString       @?            
-  $us_DatabaseString       @?            
-  $us_TrustedByte          @? 
+  $%CLSkelClass_UltimateSQL_Driver      @?
+  $%CLSkelClass_UltimateSQL_Properties  @?
+  $%CLSkelClass                         @?  
+  #IF(%GlobalFieldClass <> '')
+  $%GlobalFieldClass                    @? 
+  #ENDIF
+  $%CLSkelClass_us_ServerString         @?             
+  $%CLSkelClass_us_UserNameString       @?           
+  $%CLSkelClass_us_PasswordString       @?            
+  $%CLSkelClass_us_DatabaseString       @?            
+  $%CLSkelClass_us_TrustedByte          @? 
+#ENDAT  
+        
+#AT(%mpLibXL7)
+    <FileDriver Include="MSSQL" />
+    <FileDriver Include="SQLite" />
+    <FileDriver Include="ODBC" />
 #ENDAT
 
-#AT(%ProgramSetup),WHERE(~%CLSkelAppDisable)      
- #EMBED(%usBeforeSQLClassInit,'Before Ultimate SQL Init')
- %CLSkelClass.DebugPrefix = '%CLDebugPrefix'
- %CLSkelClass.ASCIIFileName = '%CLLogFileName' 
- %CLSkelClass.Init()   
- #EMBED(%usAfterSQLClassInit,'After Ultimate SQL Init')
- #IF(%PromptToConnect)                    
- #IF(%ServerString)
- us_ServerString = %ServerString
- #ELSE
- us_ServerString = ''
+#AT(%ProgramSetup),WHERE(~%CLSkelAppDisable AND %ProgramExtension = 'EXE'),PRIORITY(1)     
+ #EMBED(%usBeforeSQLObjectInit,'Before Ultimate SQL Object Init'),%CLSkelClass,MAP(%ActiveTemplate, %CLSkelClass) 
+%CLSkelClass.DebugPrefix = '%CLDebugPrefix'
+%CLSkelClass.ASCIIFileName = '%CLLogFileName' 
+ #CASE(%SQLDriver)
+ #OF('SQLite')  
+%CLSkelClass_UltimateSQL_Driver     = ULSDriver_SQLite   
+   #IF(%SQLiteDatabaseFile)
+%CLSkelClass_UltimateSQL_Properties = %SQLiteDatabaseFile   
+   #ENDIF
+   #IF(%SQLiteDatabaseType = 'In-Memory')
+%CLSkelClass.SQLiteInMemory         = TRUE   
+   #ENDIF
+ #OF('MS_SQL')  
+%CLSkelClass_UltimateSQL_Driver     = ULSDriver_MSSQL
+%CLSkelClass_UltimateSQL_Properties = ''
+ #OF('ODBC')
+%CLSkelClass_UltimateSQL_Driver     = ULSDriver_ODBC
+   #IF(%ODBCDriver)
+%CLSkelClass_UltimateSQL_Properties = %ODBCDriver
+   #ENDIF
+%CLSkelClass.ODBCSilentInstall      = %SilentInstall
+ #ENDCASE  
+ #IF(%ApplicationName)
+%CLSkelClass.ApplicationName        = %ApplicationName
+ #ENDIF 
+ #IF(%SQLDriver = 'MS_SQL' AND %NCInstaller64Bit)
+%CLSkelClass.ODBCDriverMSIFileLocation = %NCInstaller64Bit 
+ #ENDIF 
+ #IF(%SQLDriver = 'ODBC' AND %Installer64Bit)
+%CLSkelClass.ODBCDriverMSIFileLocation = %Installer64Bit 
+ #ENDIF 
+ #IF(%WSID)
+%CLSkelClass.WSID                   = %WSID
  #ENDIF
- #IF(%UserNameString)
- us_UserNameString = %UserNameString
- #ELSE
- us_UserNameString = ''
- #ENDIF
- #IF(%PasswordString)
- us_PasswordString = %PasswordString
- #ELSE
- us_PasswordString = ''
- #ENDIF
- #IF(%DatabaseString)
- us_DatabaseString = %DatabaseString
- #ELSE
- us_DatabaseString = ''
- #ENDIF
- #IF(%TrustedByte)
- us_TrustedByte = %TrustedByte
- #ELSE
- us_TrustedByte = ''
- #ENDIF  
- #EMBED(%usBeforeConnection,'Before Ultimate SQL Connection')
- %ConnectionString = %CLSkelClass.Connect(us_ServerString,us_UserNameString,us_PasswordString,us_DatabaseString,us_TrustedByte)
- IF ~%ConnectionString;RETURN.
- %CLSkelClass.SetQueryConnection(%ConnectionString,'%QueryTable') 
- #EMBED(%usAfterConnection,'After Ultimate SQL Connection')
- #ENDIF
-#IF(%PromptToConnect) 
- #IF(%MultipleActiveResultSets) 
- %CLSkelClass.MultipleActiveResultSets(TRUE)
- #ELSE
- %CLSkelClass.MultipleActiveResultSets(FALSE)
- #ENDIF    
- #IF(%VerifyViaSelect) 
- %CLSkelClass.VerifyViaSelect(TRUE)
- #ELSE
- %CLSkelClass.VerifyViaSelect(FALSE)
- #ENDIF
- #IF(%SaveStoredProcedure) 
- %CLSkelClass.SaveStoredProcedure(TRUE)
- #ELSE
- %CLSkelClass.SaveStoredProcedure(FALSE)
- #ENDIF
- #IF(%GatherAtOpen) 
- %CLSkelClass.GatherAtOpen(TRUE)
- #ELSE
- %CLSkelClass.GatherAtOpen(FALSE)
- #ENDIF
- #IF(%IgnoreTruncation) 
- %CLSkelClass.IgnoreTruncation(TRUE)
- #ELSE
- %CLSkelClass.IgnoreTruncation(FALSE)
- #ENDIF
- #IF(%BusyHandling) 
- %CLSkelClass.BusyHandling(%BusyHandlingOption)  
- #ENDIF
- #FOR(%AdditionalDriverStrings)
- %CLSkelClass.SendDriverString(%AdditionalDriverString) 
- #ENDFOR
+%CLSkelClass.Init(%CLSkelClass_UltimateSQL_Driver,%CLSkelClass_UltimateSQL_Properties,%UseRegistryForServerLoading) 
+ #EMBED(%usAfterSQLObjectInit,'After Ultimate SQL Object Init'),%CLSkelClass,MAP(%ActiveTemplate, %CLSkelClass)  
+ #IF(%SQLDriver = 'SQLite')  
+ #ELSE     
+%CLSkelClass.Provider = '%OLEDBDriver'
+   #IF(%RequireNativeClient = 1)
+%CLSkelClass.RequireNativeClient = TRUE   
+   #ENDIF
+   #IF(%PromptToConnect)                    
+     #IF(%ServerString)
+%CLSkelClass_us_ServerString = %ServerString
+     #ELSE
+%CLSkelClass_us_ServerString = ''
+     #ENDIF
+     #IF(%UserNameString)
+%CLSkelClass_us_UserNameString = %UserNameString
+     #ELSE
+%CLSkelClass_us_UserNameString = ''
+     #ENDIF
+     #IF(%PasswordString)
+%CLSkelClass_us_PasswordString = %PasswordString
+     #ELSE
+%CLSkelClass_us_PasswordString = ''
+     #ENDIF
+     #IF(%DatabaseString)
+%CLSkelClass_us_DatabaseString = %DatabaseString
+     #ELSE
+%CLSkelClass_us_DatabaseString = ''
+     #ENDIF
+     #IF(%TrustedByte)
+%CLSkelClass_us_TrustedByte = %TrustedByte
+     #ELSE
+%CLSkelClass_us_TrustedByte = ''
+     #ENDIF
+     #IF(%SkipConnectionPrompt = 0)
+     #EMBED(%usBeforeSQLConnection,'Before Ultimate SQL Connection'),%CLSkelClass,MAP(%ActiveTemplate, %CLSkelClass)
+%ConnectionString = %CLSkelClass.Connect(%CLSkelClass_us_ServerString,%CLSkelClass_us_UserNameString,%CLSkelClass_us_PasswordString,%CLSkelClass_us_DatabaseString,%CLSkelClass_us_TrustedByte)
+IF ~%ConnectionString;RETURN.
+     #ENDIF
+       #IF(%ServerString AND SUB(%ServerString,1,1) ~= '''')
+%ServerString = %CLSkelClass_us_ServerString
+       #ENDIF
+       #IF(%UserNameString AND SUB(%UserNameString,1,1) ~= '''')
+%UserNameString = %CLSkelClass_us_UserNameString
+       #ENDIF
+       #IF(%PasswordString AND SUB(%PasswordString,1,1) ~= '''')
+%PasswordString = %CLSkelClass_us_PasswordString
+       #ENDIF
+       #IF(%DatabaseString AND SUB(%DatabaseString,1,1) ~= '''')
+%DatabaseString = %CLSkelClass_us_DatabaseString
+       #ENDIF
+       #IF(%TrustedByte AND SUB(%TrustedByte,1,1) ~= '''' AND UPPER(%TrustedByte) <> 'FALSE' AND UPPER(%TrustedByte) <> 'TRUE' AND %TrustedByte <> '0' AND %TrustedByte <> '1')
+%TrustedByte = %CLSkelClass_us_TrustedByte
+       #ENDIF
+       
+     #EMBED(%usAfterSQLConnection,'After Ultimate SQL Connection'),%CLSkelClass,MAP(%ActiveTemplate, %CLSkelClass)
+     
+     #IF(%MultipleActiveResultSets) 
+%CLSkelClass.SetMultipleActiveResultSets(TRUE)
+     #ELSE
+%CLSkelClass.SetMultipleActiveResultSets(FALSE)
+     #ENDIF    
+     #IF(%VerifyViaSelect) 
+%CLSkelClass.SetVerifyViaSelect(TRUE)
+     #ELSE
+%CLSkelClass.SetVerifyViaSelect(FALSE)
+     #ENDIF
+     #IF(%SaveStoredProcedure) 
+%CLSkelClass.SetSaveStoredProcedure(TRUE)
+     #ELSE
+%CLSkelClass.SetSaveStoredProcedure(FALSE)
+     #ENDIF
+     #IF(%GatherAtOpen) 
+%CLSkelClass.SetGatherAtOpen(TRUE)
+     #ELSE
+%CLSkelClass.SetGatherAtOpen(FALSE)
+     #ENDIF
+     #IF(%IgnoreTruncation) 
+%CLSkelClass.SetIgnoreTruncation(TRUE)
+     #ELSE
+%CLSkelClass.SetIgnoreTruncation(FALSE)
+     #ENDIF
+     #IF(%BusyHandling) 
+%CLSkelClass.SetBusyHandling(%BusyHandlingOption)  
+     #ENDIF
+     #FOR(%AdditionalDriverStrings)
+%CLSkelClass.SendDriverString(%AdditionalDriverString) 
+     #ENDFOR
+   #ENDIF   
 #ENDIF
 #ENDAT
 #!  
@@ -168,7 +323,7 @@ us_TrustedByte              BYTE(0)%CLSkelDataExternal
   #PROMPT('IgnoreTruncation',CHECK),%IgnoreTruncation,AT(10)
   #PROMPT('BusyHandling',CHECK),%BusyHandling,AT(10)
   #ENABLE(%BusyHandling)
-  #PROMPT('Options',OPTION),%BusyHandlingOption,CHOICE
+  #PROMPT('Options',OPTION),%BusyHandlingOption,CHOICE,AT(10,,,60)
   #PROMPT('Do Nothing (1)',RADIO)
   #PROMPT('One Connection Per Thread (2)',RADIO)
   #PROMPT('Retry On Busy (3)',RADIO)
@@ -176,7 +331,7 @@ us_TrustedByte              BYTE(0)%CLSkelDataExternal
   #ENDENABLE    
   #BOXED('Additional Driver Strings')
     #BUTTON('Driver Strings'),MULTI(%AdditionalDriverStrings,%AdditionalDriverString),INLINE
-    #PROMPT('Driver String:',@S100),%AdditionalDriverString,REQ 
+    #PROMPT('Driver String:',EXPR),%AdditionalDriverString,REQ 
     #DISPLAY('Use Single Quotes if not using a Variable')
     #ENDBUTTON
   #ENDBOXED
@@ -186,24 +341,18 @@ us_TrustedByte              BYTE(0)%CLSkelDataExternal
 #GROUP(%TabInstructions) 
   #TAB('Methods')
   #DISPLAY('')
-  #DISPLAY('.Init(String pConnectionString,<String pQueryTableName>)')
-  #DISPLAY(' Initializes the Connection String')
-  #DISPLAY('  ex: SQL.Init(<39>Server<39>,<39>Database<39>,<39>User<39>,<39>Password<39>')
-  #DISPLAY('  NOTE: You can optionally specify the name of the')
-  #DISPLAY('    Query Table that will be created in your SQL database.')
-  #DISPLAY('    The default name is dbo.Queries .')
-  #DISPLAY('')
   #DISPLAY('.Query(String pQuery)')
   #DISPLAY(' Runs an SQL statement that does not return a result.')
   #DISPLAY('  ex: SQL.Query(<39>EXEC myStoredProcedure<39>)')
   #DISPLAY('')
-  #DISPLAY('.Query(String pQuery,,*? Result')
+  #DISPLAY('.QueryResult(String pQuery)')
   #DISPLAY(' Runs an SQL Statement that returns ONE value')
-  #DISPLAY('  ex: SQL.Query(<39>Select COUNT(*) From ATable<39>,,Result)')
+  #DISPLAY('  ex: Count = SQL.QueryResult(<39>Select COUNT(*) From ATable<39>)')
   #DISPLAY('')
   #DISPLAY('.Query(String pQuery,*Queue pQ,*? Queue.Field(s)')
   #DISPLAY(' Runs an SQL Statement that returns multiple results.')  
   #DISPLAY('  ex: SQL.Query(<39>Select Name From Customers<39>,q,q.Name)')
+  #DISPLAY('  ex: SQL.Query(<39>Select * From Customers<39>,q)')
   #DISPLAY('')
   #DISPLAY('See example app for more information.')  
   #DISPLAY('')
@@ -227,14 +376,18 @@ us_TrustedByte              BYTE(0)%CLSkelDataExternal
   #DISPLAY('')
   #DISPLAY('.AppendQueryToClipboard')
   #DISPLAY(' Appends subsequent Queries to the Clipboard')
-  #DISPLAY('  ex: SQL.AppendQueryToClipboard(TRUE)')
+  #DISPLAY('  ex: SQL.AppendQueryToClipboard(TRUE)')   
+  #DISPLAY('')
+  #DISPLAY('To view your statement in Debugview, place a <39>*<39> as')
+  #DISPLAY('  the first character in your Query')
+  #DISPLAY('  ex: SQL.Query(<39>*Select * From Customers,q<39>')
   #ENDTAB
 #!
 
 #!
 #GROUP(%TabCopyright)
 #BOXED,SECTION,AT(0,23,240,42)
-  #DISPLAY('Ultimate SQL'),AT(10,0),PROP(PROP:FontStyle,700),PROP(PROP:FontName,'Tahoma')
+  #DISPLAY('UltimateSQL'),AT(10,0),PROP(PROP:FontStyle,700),PROP(PROP:FontName,'Tahoma')
   #DISPLAY('Version ' & %UltimateSQLTPLVersion),AT(10,10),PROP(PROP:FontStyle,700),PROP(PROP:FontName,'Tahoma')
   #DISPLAY('http://www.clarionlive.com'),AT(10,30)
   #DISPLAY('')
@@ -247,14 +400,27 @@ us_TrustedByte              BYTE(0)%CLSkelDataExternal
   #DISPLAY('Arnold Young + John Hickey = Clarion Live')
   #DISPLAY('http://www.clarionlive.com')
   #DISPLAY
-  #DISPLAY('Andy Wilton - Noyantis Software')
+  #DISPLAY('Rick Martin - Upper Park Solutions')
+  #DISPLAY('http://www.upperparksolutions.com') 
+  #DISPLAY
+  #DISPLAY('Andy Wilton - noyantis Software')
   #DISPLAY('http://www.noyantis.com')   
   #DISPLAY
   #DISPLAY('Mike Hanson - BoxSoft')
   #DISPLAY('http://www.boxsoft.net')
   #DISPLAY
+  #DISPLAY('Gordon Holfelder - AccuFund, Inc.')
+  #DISPLAY('http://www.accufund.com')
+  #DISPLAY
   #DISPLAY('Mark Goldberg')
   #DISPLAY('Contributing DebugEvent')
+  #DISPLAY('and ctFieldQ')
+  #DISPLAY
+  #DISPLAY('Rick Smith')
+  #DISPLAY('Contributing QueryCT')
+  #DISPLAY
+  #DISPLAY('Carl Barnes')
+  #DISPLAY('Contributing String Enhancements')
   #DISPLAY
 #ENDTAB
 #!
@@ -318,4 +484,19 @@ us_TrustedByte              BYTE(0)%CLSkelDataExternal
       #SET(%CLSkelFamily,'ABC')
     #ENDIF
   #ENDIF
-#ENDIF
+#ENDIF 
+#GROUP(%TabInMemorySupport)
+#TAB('&InMemorySupport'),WHERE(%SQLDriver = 'SQLite' AND %SQLiteDatabaseType = 'In-Memory')
+#DISPLAY(' ')
+#DISPLAY('Enable support for SQLite In-Memory Database Support')
+#DISPLAY('')  
+#DISPLAY('To create an In-Memory Table: ')
+#DISPLAY(' 1. Create an SQLite Table in your Dictionary ')
+#DISPLAY(' 2. For the Owner string, use :memory:')
+#DISPLAY(' 3. That''s it! ')
+#DISPLAY('')
+#DISPLAY('')
+#DISPLAY('')
+#DISPLAY('')
+#DISPLAY('')
+#ENDTAB

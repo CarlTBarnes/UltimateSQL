@@ -1,7 +1,7 @@
-#TEMPLATE(UltimateSQL,'Ultimate SQL Template (v.99)'),FAMILY('ABC'),FAMILY('Clarion'),FAMILY('cw20')
+#TEMPLATE(UltimateSQL,'Ultimate SQL Version: 2022.02.22.1'),FAMILY('ABC'),FAMILY('Clarion'),FAMILY('cw20')
 #!-----------------------------------------------------------------------------------------------------
 #SYSTEM
-#EQUATE(%UltimateSQLTPLVersion,'.99')
+#EQUATE(%UltimateSQLTPLVersion,'v2022.02.22.1')
 #!
 #! SystemIdle (Global Extension)
 #!
