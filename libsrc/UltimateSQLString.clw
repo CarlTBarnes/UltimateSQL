@@ -119,103 +119,146 @@ curIdx                                      LONG, AUTO
 !!! is converted to CHAR(nn) where nn is the decimal representation
 !!! of the character.</remarks>
 ! -----------------------------------------------------------------------
-UltimateSQLString.Quote                 PROCEDURE(<LONG pDriver>)
+UltimateSQLString.Quote         PROCEDURE(<LONG pDriver>)
 
-curValues                                   STRING('0123456789abcdef')
-curChar                                     STRING(1), AUTO
-curAssign                                   CSTRING(21), AUTO
-curInstance                                 LONG, AUTO
-curVal1                                     LONG, AUTO
-curVal2                                     LONG, AUTO
-curText                                     BYTE(False)
-curDriver                                   LONG, AUTO
+curValues                           STRING('0123456789abcdef')
+curChar                             STRING(1), AUTO
+curAssign                           CSTRING(21), AUTO
+curInstance                         LONG, AUTO
+curVal1                             LONG, AUTO
+curVal2                             LONG, AUTO
+curText                             BYTE(False)
+curDriver                           LONG, AUTO
+
+VarLength                           LONG(0)
 
     CODE 
-    ud.DebugOff = FALSE
-    ud.DebugPrefix = '!'
-    IF OMITTED(2)
-        curDriver =  SELF._Driver
+
+    CLEAR(curInstance)    
+    VarLength  =  LEN(SELF.Value)
+    !  ud.Debug('== varlength ' & VarLength)
+    !  ud.Debug('the value before ' & SELF.Value & '  len ' & LEN(SELF.Value))
+    IF VarLength = 0
+           
     ELSE
-        curDriver =  pDriver
-    END
-    CASE curDriver
-    OF uss_Driver_SyBase              !! Sybase
-        CLEAR(curInstance)
+        
         LOOP
-            curInstance +=  1
+            curInstance  +=  1   
+            !  ud.Debug('TOP curInstance ' & curInstance & '  len val ' & LEN(SELF.Value) & '  varleng ' & VarLength)
             IF curInstance > LEN(SELF.Value)
+                !  ud.Debug('== breaking on curinstance ' & curInstance)
                 BREAK
             END
-            curChar =  SELF.Value[curInstance : curInstance]
-            IF curChar < ' ' |
-                OR INSTRING(curChar, '''\')
-                curVal1 =  BSHIFT(BAND(VAL(curChar), 11110000b), -4) + 1
-                curVal2 =  BAND(VAL(curChar), 00001111b) + 1
-                SELF.Assign(SUB(SELF.Value, 1, curInstance-1) & |
-                    '\x' & curValues[curVal1 : curVal1] & curValues[curVal2 : curVal2] & |
-                    SUB(SELF.Value, curInstance+1, LEN(SELF.Value)-curInstance))
-                curInstance +=  3
+            !  ud.Debug('== curinstance ' & curInstance & '  val ' & SELF.Value & '  len ' & LEN(SELF.Value))
+            !  ud.Debug('== curinstancelen len ' & LEN(SELF.Value))
+            curChar  =  SELF.Value[curInstance : curInstance] 
+            !  ud.Debug('==  val curinstance ' & curChar & '  valof it ' & val(curChar))
+            CH# = val(curChar)
+            !  ud.Debug('== what is val '& CH#)
+                 
+                    
+!                IF CH# < 32  !  CH# = 0 OR CH# = 1 
+            IF CH# = 0    
+                SELF.Assign('<39><39>')
+                !  ud.Debug('== ch was 0 returning')
+                RETURN 
             END
-        END
-        SELF.PreAppend('''')
-        SELF.Append('''')
-    OF uss_Driver_MSSQL              !! MS SQL
-        CLEAR(curInstance)                 
-        LOOP
-            curInstance +=  1   
-            IF curInstance > LEN(SELF.Value)                   
-                BREAK
-            END
-            curChar =  SELF.Value[curInstance : curInstance] 
-            IF curChar < ' ' |
-                OR curChar = ''''
-                curAssign =  'CHAR(' & VAL(curChar) & ')'   
-                IF curText
-                    SELF.Assign(SELF.Value[1 : curInstance-1] & |
-                        '''' & |
-                        SELF.Value[curInstance : LEN(SELF.Value)])
-                    curText      =  False
-                    curInstance +=  1
-                END
+                
+!!                IF curChar < ' ' |
+!!                        OR curChar = ''''
+            IF curChar = '<39>'
+                !  ud.Debug('==  was a single quote ' & curChar & '  chr ' & val(curChar) & '   curText ' & curText)
+!!                curAssign  =  'CHAR(' & VAL(curChar) & ')'   
+                curAssign  =  '<39><39>'   
+!!                IF curText
+!!                    !  ud.Debug('==  1 curText ' & curText)
+!!                    SELF.Assign(SELF.Value[1 : curInstance-1] & |
+!!                            '<39>' & |
+!!                            SELF.Value[curInstance : LEN(SELF.Value)])
+!!                    curText  =  False
+!!                    !  ud.Debug('==  2')
+!!!                    curInstance  +=  1
+!!                END
+                !  ud.Debug('curInstance is ' & curInstance)
                 IF curInstance > 1
-                    IF curInstance+1 > LEN(SELF.Value)  
+                    !  ud.Debug('==  3')
+                    
+                    IF curInstance + 1 > LEN(SELF.Value)  
                         SELF.Assign(SELF.Value[1 : curInstance-1] & |
-                            '+' & curAssign)
+                                curAssign)
+!!                                '+' & curAssign)
+                        !  ud.Debug('==  4')
+                        
                     ELSE
                         SELF.Assign(SELF.Value[1 : curInstance-1] & |
-                            '+' & curAssign & |
-                            SELF.Value[curInstance+1 : LEN(SELF.Value)])
+                                curAssign & |
+                                SELF.Value[curInstance+1 : LEN(SELF.Value)])
+                        !  ud.Debug('==  5')
+                        
                     END
-                    curInstance +=  LEN(curAssign)
+                    curInstance  +=  LEN(curAssign) -1
+                    !  ud.Debug('== len curassign ' & LEN(curAssign) & '  curinst ' & curInstance)
                 ELSE           
-                    SELF.Assign(SELF.Value[1 : curInstance-1] & |
-                        curAssign & |
-                        SELF.Value[curInstance+1 : LEN(SELF.Value)])
-                    curInstance +=  (LEN(curAssign) - 1)
+                    !  ud.Debug('==  6 ' & ' curinstance ' & curInstance & ' len ' & LEN(SELF.Value))
+                    
+!!                        SELF.Assign(curAssign) & |
+!!                                SELF.Value[curInstance+1 : LEN(SELF.Value)])  !<was this
+                        
+!!                        SELF.Assign(SELF.Value[curInstance : LEN(SELF.Value)])
+                        
+!!                        SELF.Assign(curAssign)
+                    !  ud.Debug('==  7')
+                    !  ud.Debug(' self value ' & SELF.Value)
+!!                        curInstance =  SELF.Length(TRUE)  !    (LEN(curAssign) )   
+                    SELF.Assign('<39>' & curAssign & |
+                            SELF.Value[curInstance+1 : LEN(SELF.Value)]) 
+                    !  ud.Debug('==7a self is now ' & SELF.Value) 
+                    curInstance  =  LEN(curAssign) + 1  
                 END
             ELSIF ~curText 
                 IF curInstance > 1
+                    !  ud.Debug('==  8')
+                    
                     SELF.Assign(SELF.Value[1 : curInstance-1] & |
-                        '+''' & |
-                        SELF.Value[curInstance : LEN(SELF.Value)])
-                    curInstance +=  2
+                            SELF.Value[curInstance : LEN(SELF.Value)])
+!!                    curInstance  +=  2
+                    !  ud.Debug('==  9')
+                    
                 ELSE
+                    !  ud.Debug('==  10')
+                    
                     SELF.Assign(SELF.Value[1 : curInstance-1] & |
-                        '''' & |
-                        SELF.Value[curInstance : LEN(SELF.Value)])
-                    curInstance +=  1
+                            '''' & |
+                            SELF.Value[curInstance : LEN(SELF.Value)])
+                    curInstance  +=  1
+                    !  ud.Debug('==  11')
+                    
                 END        
-                curText =  True
+                curText  =  True
             END
         END
-        IF curText
-            SELF.Append('''')
-        ELSIF SELF.Length() = 0
-            SELF.Assign('''''')
-        END
+    END
         
-        SELF.Replace('CHR(','char(')
-    END  
+    !  ud.Debug('==  12')
+        
+    IF curText 
+        !  ud.Debug('==  13')
+            
+        SELF.Append('<39>')
+    ELSIF SELF.Length() = 0
+        !!!!  !  ud.Debug('==  14')
+            
+        SELF.Assign('<39><39>')
+    END
+    !!!!  !  ud.Debug('==  15')
+        
+    
+    
+    SELF.Replace('CHR(','char(')
+    SELF.Replace('CHAR(0)+','')
+!!!    END  
+    !  ud.Debug('the value after ' & SELF.Value & '  len ' & LEN(SELF.Value))
+     
     
     RETURN
 
