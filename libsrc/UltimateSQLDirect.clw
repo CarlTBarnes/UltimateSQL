@@ -1,6 +1,6 @@
-  Member()
-  MAP
-  END
+                                Member()
+                                MAP
+                                END
 
 !*****************************************************************************************************************
 !Copyright (C) 2007-2011 Rick Martin, rick.martin@upperparksolutions.com
@@ -16,13 +16,14 @@
 !*****************************************************************************************************************
 
 
-  Include('UltimateSQLDirect.Inc'),ONCE
-  Include('UltimateString.INC'),ONCE     
+    Include('UltimateSQLDirect.Inc'),ONCE
+    Include('UltimateString.INC'),ONCE     
 
 !  INCLUDE('SpecialFolder.inc'), ONCE
 !  INCLUDE('CSIDL.EQU'), ONCE
 
-  PRAGMA('link(C%V%ASC%X%%L%.LIB)')
+                                PRAGMA('link(C%V%ASC%X%%L%.LIB)')
+
 
 !
 UltimateSQLDirect.AddMessagesToResultSet        Procedure()
@@ -31,11 +32,11 @@ lCnt                                                LONG
 
     Code
         
-        Loop lCnt = 1 To Records(Self.ErrorMsg)
-            Get(Self.ErrorMsg,lCnt)
-            Self.ResultSets.MessageQ = Self.ErrorMsg
-            Add(Self.ResultSets.MessageQ)
-        End
+    Loop lCnt = 1 To Records(Self.ErrorMsg)
+        Get(Self.ErrorMsg,lCnt)
+        Self.ResultSets.MessageQ =  Self.ErrorMsg
+        Add(Self.ResultSets.MessageQ)
+    End
 !
         
 UltimateSQLDirect.AddResultRow          Procedure()
@@ -43,55 +44,55 @@ UltimateSQLDirect.AddResultRow          Procedure()
 ReturnValue                                 LONG(Level:Benign)
 hresult                                     LONG,AUTO
 lCnt                                        LONG,AUTO
-ColBuffer                                   CSTRING(1024)
+ColBuffer                                   CSTRING(600000)  !originally 1024
 ColData                                     UltimateString
 ColDataLength                               LONG
 
     Code
         
-        If Not Records(Self.CurrentColumnDescriptor)
-            R# = Self.GatherColumnInfo()
-        End   
+    If Not Records(Self.CurrentColumnDescriptor)
+        R# = Self.GatherColumnInfo()
+    End   
         
-        Clear(Self.CurrentResultSet)
-        Self.CurrentResultSet.SQLColumns &= New(SQLResultsRowQueueType)
-        Add(Self.CurrentResultSet)
-        Loop lCnt = 1 To Self.SQLColCount
-            ColData.Assign('')
-            LOOP
-                hresult = usd_SQLGetData(self.hstmt, lCnt, UltimateSQL_C_CHAR, Address(ColBuffer), Size(ColBuffer), ColDataLength)
-                If hresult = UltimateSQL_Success OR hresult = UltimateSQL_Success_with_Info
-                    If ColDataLength > 0
-                        If ColDataLength > Size(ColBuffer)
-                            ColData.Append(ColBuffer)
-                        Else
-                            ColData.Append(ColBuffer[1 : ColDataLength])
-                        End
-                    elsif ColDataLength = UltimateSQL_NULL_DATA
-                      !Null data will be added as a null entry for SQLColumnValue
+    Clear(Self.CurrentResultSet)
+    Self.CurrentResultSet.SQLColumns &=  New(SQLResultsRowQueueType)
+    Add(Self.CurrentResultSet)
+    Loop lCnt = 1 To Self.SQLColCount
+        ColData.Assign('')
+        LOOP
+            hresult =  usd_SQLGetData(self.hstmt, lCnt, UltimateSQL_C_CHAR, Address(ColBuffer), Size(ColBuffer), ColDataLength)
+            If hresult = UltimateSQL_Success OR hresult = UltimateSQL_Success_with_Info
+                If ColDataLength > 0
+                    If ColDataLength > Size(ColBuffer)
+                        ColData.Append(ColBuffer)
+                    Else
+                        ColData.Append(ColBuffer[1 : ColDataLength])
                     End
-                ElsIf hresult=UltimateSQL_No_Data 
-                    Break
-                Else
-                    ReturnValue = Level:Notify
-                    Self.GetLastError(UltimateSQL_HANDLE_STMT,Self.hstmt)
-                    Break
+                elsif ColDataLength = UltimateSQL_NULL_DATA
+                    !Null data will be added as a null entry for SQLColumnValue
                 End
-            End 
-            If ReturnValue = Level:Notify
+            ElsIf hresult=UltimateSQL_No_Data 
                 Break
-            ElsIf ColData.Length()
-                Clear(Self.CurrentResultSet.SQLColumns)
-                Self.CurrentResultSet.SQLColumns.SQLColumnValue &= New(STRING(ColData.Length()))
-                Self.CurrentResultSet.SQLColumns.SQLColumnValue = ColData.Get()
-                Add(Self.CurrentResultSet.SQLColumns)
-            else
-              Clear(Self.CurrentResultSet.SQLColumns)
-              Add(Self.CurrentResultSet.SQLColumns)
+            Else
+                ReturnValue =  Level:Notify
+                Self.GetLastError(UltimateSQL_HANDLE_STMT,Self.hstmt)
+                Break
             End
-        End   
+        End 
+        If ReturnValue = Level:Notify
+            Break
+        ElsIf ColData.Length()
+            Clear(Self.CurrentResultSet.SQLColumns)
+            Self.CurrentResultSet.SQLColumns.SQLColumnValue &=  New(STRING(ColData.Length()))
+            Self.CurrentResultSet.SQLColumns.SQLColumnValue  =  ColData.Get()
+            Add(Self.CurrentResultSet.SQLColumns)
+        else
+            Clear(Self.CurrentResultSet.SQLColumns)
+            Add(Self.CurrentResultSet.SQLColumns)
+        End
+    End   
         
-        Return ReturnValue
+    Return ReturnValue
 !
         
 UltimateSQLDirect.AssignCurrentResultSet        Procedure(LONG pResultSet) !,LONG
@@ -100,22 +101,22 @@ RetVal                                              LONG(Level:Benign)
 
     Code
         
-        If pResultSet <= Records(Self.ResultSets)
-            Get(Self.ResultSets,pResultSet)
-            Self.AssignCurrentResultSet()
-        Else
-            RetVal = Level:Notify
-        End
-        Return RetVal
+    If pResultSet <= Records(Self.ResultSets)
+        Get(Self.ResultSets,pResultSet)
+        Self.AssignCurrentResultSet()
+    Else
+        RetVal =  Level:Notify
+    End
+    Return RetVal
 !
         
 UltimateSQLDirect.AssignCurrentResultSet        Procedure()
 
     Code
         
-        Self.CurrentResultSet &= Self.ResultSets.ResultSet
-        Self.CurrentColumnDescriptor &= Self.ResultSets.ColumnDescriptions
-        Self.CurrentStmt &= Self.ResultSets.Stmt
+    Self.CurrentResultSet        &=  Self.ResultSets.ResultSet
+    Self.CurrentColumnDescriptor &=  Self.ResultSets.ColumnDescriptions
+    Self.CurrentStmt             &=  Self.ResultSets.Stmt
 !
         
 UltimateSQLDirect.CancelStatement       PROCEDURE()
@@ -124,21 +125,21 @@ StartTime                                   LONG
 
     Code
         
-        z# = usd_SQLCancel(Self.hstmt)
-        If z# = UltimateSQL_Error
-            Self.GetLastError(UltimateSQL_HANDLE_STMT,Self.hstmt)
-            Self.AddMessagesToResultSet()
-        ELSE
-            Loop 
-                Case usd_SQLExecDirect(self.hstmt, Self.CurrentStmt, Len(Clip(Self.CurrentStmt)) )
-                Of UltimateSQL_STILL_EXECUTING
-                    Cycle
-                ELSE
-                    BREAK
-                END
-      !Should we do something here in case it doesn't cancel right away?
+    z# = usd_SQLCancel(Self.hstmt)
+    If z# = UltimateSQL_Error
+        Self.GetLastError(UltimateSQL_HANDLE_STMT,Self.hstmt)
+        Self.AddMessagesToResultSet()
+    ELSE
+        Loop 
+            Case usd_SQLExecDirect(self.hstmt, Self.CurrentStmt, Len(Clip(Self.CurrentStmt)) )
+            Of UltimateSQL_STILL_EXECUTING
+                Cycle
+            ELSE
+                BREAK
             END
+            !Should we do something here in case it doesn't cancel right away?
         END
+    END
 !
         
 UltimateSQLDirect.CloseConnection       Procedure()
@@ -146,102 +147,114 @@ UltimateSQLDirect.CloseConnection       Procedure()
 hresult                                     Short
 
     Code
+    if self.hstmt
+        hresult =  usd_SQLFreeHandle(UltimateSQL_HANDLE_STMT, self.hstmt)
+        If hresult <> UltimateSQL_SUCCESS AND hresult <> UltimateSQL_SUCCESS_WITH_INFO
+            Self.GetLastError(UltimateSQL_HANDLE_ENV,self.henv)
+        End
+        Clear(self.hstmt)               
         
-      if self.hstmt
-            hresult = usd_SQLFreeHandle(UltimateSQL_HANDLE_STMT, self.hstmt)
-            If hresult <> UltimateSQL_SUCCESS AND hresult <> UltimateSQL_SUCCESS_WITH_INFO
-               Self.GetLastError(UltimateSQL_HANDLE_ENV,self.henv)
-            End
-         Clear(self.hstmt)
-      END
+    END
 
-      if self.hdbc
-         hresult = usd_SQLDisconnect(self.hdbc)
-         If hresult <> UltimateSQL_SUCCESS AND hresult <> UltimateSQL_SUCCESS_WITH_INFO
+    if self.hdbc
+        hresult =  usd_SQLDisconnect(self.hdbc)
+        If hresult <> UltimateSQL_SUCCESS AND hresult <> UltimateSQL_SUCCESS_WITH_INFO
             Self.GetLastError(UltimateSQL_HANDLE_dbc,self.hdbc)
-         End
+        End
 
-         hresult = usd_SQLFreeHandle(UltimateSQL_HANDLE_DBC, self.hdbc)
-         If hresult <> UltimateSQL_SUCCESS AND hresult <> UltimateSQL_SUCCESS_WITH_INFO
+        hresult =  usd_SQLFreeHandle(UltimateSQL_HANDLE_DBC, self.hdbc)
+        If hresult <> UltimateSQL_SUCCESS AND hresult <> UltimateSQL_SUCCESS_WITH_INFO
             Self.GetLastError(UltimateSQL_HANDLE_dbc,self.hdbc)    
-         End
-         Clear(self.hdbc)
-      END
-      if self.henv and self.FreeHenv
-         hresult = usd_SQLFreeHandle(UltimateSQL_HANDLE_ENV,self.henv)
-         If hresult <> UltimateSQL_SUCCESS AND hresult <> UltimateSQL_SUCCESS_WITH_INFO
+        End
+        Clear(self.hdbc)
+        
+    END       
+    
+    if self.henv and self.FreeHenv
+        hresult =  usd_SQLFreeHandle(UltimateSQL_HANDLE_ENV,self.henv)
+        If hresult <> UltimateSQL_SUCCESS AND hresult <> UltimateSQL_SUCCESS_WITH_INFO
             Self.GetLastError(UltimateSQL_HANDLE_ENV,self.henv)    
-         End
-         Clear(self.henv)
-      end
+        End
+        Clear(self.henv)
+        
+    end
 !
         
-UltimateSQLDirect.Construct             Procedure()
+UltimateSQLDirect.Construct     Procedure()
 
     Code
         
-        If Self.ResultSets &= NULL
-            Self.ResultSets &= New(SQLResultsSetsQueueType)
-        End
+    If Self.ResultSets &= NULL
+        Self.ResultSets &=  New(SQLResultsSetsQueueType)
+    End
 !
         
-UltimateSQLDirect.Destruct              Procedure()
+UltimateSQLDirect.Destruct      Procedure()
 
-lCnt                                        LONG
+lCnt                                LONG
 
     Code
         
-        If self.hstmt
-            Assert(0,'You forgot to close connection')
-            self.CloseConnection()
-        End
+    If self.hstmt
+        Assert(0,'You forgot to close connection')
+        self.CloseConnection()
+    End
+    Self.FreeAllResultSets()
+    RETURN
+  
+            
+UltimateSQLDirect.ExecDirect    Procedure(String SqlStmt, LONG pFreeAllResults=1, LONG pQuiet=0, LONG pProcessResultSets=1)!,Byte,Proc
+
+ReturnValue                         LONG(UltimateSQL_Success)
+
+    Code
+   
+    Self.Quiet =  pQuiet
+    If pFreeAllResults = SQLDirect:FreeResults
         Self.FreeAllResultSets()
-!
-        
-UltimateSQLDirect.ExecDirect            Procedure(String SqlStmt, LONG pFreeAllResults=1, LONG pQuiet=0, LONG pProcessResultSets=1)!,Byte,Proc
+    End  
+    Self.StatementCompleted =  false
+    Self.InitializeResultSet(SQLStmt)
+    if pProcessResultSets = SQLDirect:CallerHandleResultSets
+        If usd_SQLSetStmtAttr(self.hstmt, UltimateSQL_ATTR_ASYNC_ENABLE, UltimateSQL_ASYNC_ENABLE_ON, 0) <> UltimateSQL_Success
+            pProcessResultSets =  SQLDirect:ProcessResultSets
+        END
+    END 
 
-ReturnValue                                 LONG(UltimateSQL_Success)
-
-    Code
+    Loop
+        Self.CurrentResult =  usd_SQLExecDirect(self.hstmt, Self.CurrentStmt, Len(Clip(Self.CurrentStmt)) ) + 0
+    
+!!        If Self.CurrentREsult = ''
+!!            BREAK
+!!        END
         
-        Self.Quiet = pQuiet
-        If pFreeAllResults = SQLDirect:FreeResults
-            Self.FreeAllResultSets()
-        End  
-        Self.StatementCompleted = false
-        Self.InitializeResultSet(SQLStmt)
-        if pProcessResultSets = SQLDirect:CallerHandleResultSets
-            If usd_SQLSetStmtAttr(self.hstmt, UltimateSQL_ATTR_ASYNC_ENABLE, UltimateSQL_ASYNC_ENABLE_ON, 0) <> UltimateSQL_Success
-                pProcessResultSets = SQLDirect:ProcessResultSets
+        Case Self.CurrentResult
+        Of UltimateSQL_Success OROF UltimateSQL_Success_with_Info  
+            ReturnValue             =  Self.ProcessResultSet()
+            Self.StatementCompleted =  true
+            Break
+        OF UltimateSQL_STILL_EXECUTING             
+            If pProcessResultSets = SQLDirect:ProcessResultSets
+                Cycle
+            ELSE
+                ReturnValue =  Self.CurrentResult
+                BREAK
             END
-        END 
-        Loop
-            Self.CurrentResult = usd_SQLExecDirect(self.hstmt, Self.CurrentStmt, Len(Clip(Self.CurrentStmt)) )
-            Case Self.CurrentResult
-            Of UltimateSQL_Success OROF UltimateSQL_Success_with_Info  
-                ReturnValue = Self.ProcessResultSet()
-                Self.StatementCompleted = true
-                Break
-            OF UltimateSQL_STILL_EXECUTING             
-                If pProcessResultSets = SQLDirect:ProcessResultSets
-                    Cycle
-                ELSE
-                    ReturnValue = Self.CurrentResult
-                    BREAK
-                END
-            Of UltimateSQL_NO_DATA
-                ReturnValue = UltimateSQL_Success
-            Else
-                Self.GetLastError(UltimateSQL_HANDLE_STMT,Self.hstmt)
-                Self.AddMessagesToResultSet()
-                If pProcessResultSets = SQLDirect:CallerHandleResultSets
-                    Self.CancelStatement()
-                END
-                ReturnValue = UltimateSQL_Error
-                Break
-            End
-        End 
-        Return ReturnValue
+        Of UltimateSQL_NO_DATA
+            ReturnValue =  UltimateSQL_Success
+            Break
+        Else
+            Self.GetLastError(UltimateSQL_HANDLE_STMT,Self.hstmt)
+            Self.AddMessagesToResultSet()
+            If pProcessResultSets = SQLDirect:CallerHandleResultSets
+                Self.CancelStatement()
+            END
+            ReturnValue =  UltimateSQL_Error
+            Break
+        End
+       
+    End 
+    Return ReturnValue
 ! 
         
 UltimateSQLDirect.ExecDirectContinue    Procedure(LONG pProcessResultSets=1)!,Byte,Proc
@@ -250,43 +263,43 @@ ReturnValue                                 LONG(UltimateSQL_Success)
 
     Code
         
-        if NOT Self.StatementCompleted 
-            Self.CurrentResult = usd_SQLExecDirect(self.hstmt, Self.CurrentStmt, Len(Clip(Self.CurrentStmt)) )
-            Case Self.CurrentResult
-            Of UltimateSQL_Success OROF UltimateSQL_Success_with_Info 
-                If pProcessResultSets = SQLDirect:ProcessResultSets
-                    ReturnValue = Self.ProcessResultSet()
-                ELSE
-                    ReturnValue = Self.CurrentResult
-                END
-                Self.StatementCompleted = true
-            OF UltimateSQL_STILL_EXECUTING
-                ReturnValue = Self.CurrentResult
-            Else
-                Self.GetLastError(UltimateSQL_HANDLE_STMT,Self.hstmt)
-                Self.AddMessagesToResultSet()
-                Self.CancelStatement()
-                Self.StatementCompleted = true
-                ReturnValue = UltimateSQL_Error
-            End
-        END
-        Return ReturnValue
+    if NOT Self.StatementCompleted 
+        Self.CurrentResult =  usd_SQLExecDirect(self.hstmt, Self.CurrentStmt, Len(Clip(Self.CurrentStmt)) )
+        Case Self.CurrentResult
+        Of UltimateSQL_Success OROF UltimateSQL_Success_with_Info 
+            If pProcessResultSets = SQLDirect:ProcessResultSets
+                ReturnValue =  Self.ProcessResultSet()
+            ELSE
+                ReturnValue =  Self.CurrentResult
+            END
+            Self.StatementCompleted =  true
+        OF UltimateSQL_STILL_EXECUTING
+            ReturnValue =  Self.CurrentResult
+        Else
+            Self.GetLastError(UltimateSQL_HANDLE_STMT,Self.hstmt)
+            Self.AddMessagesToResultSet()
+            Self.CancelStatement()
+            Self.StatementCompleted =  true
+            ReturnValue             =  UltimateSQL_Error
+        End
+    END
+    Return ReturnValue
 !
         
-UltimateSQLDirect.ExecDirectSingleValue         Procedure(*? pUpdateField, String SqlStmt, long pRow=1, long pColumn=1, LONG pQuiet=0)!,LONG
+UltimateSQLDirect.ExecDirectSingleValue Procedure(*? pUpdateField, String SqlStmt, long pRow=1, long pColumn=1, LONG pQuiet=0)!,LONG
 
-ReturnValue                                         long
+ReturnValue                                 long
 
     code
         
-        clear(pUpdateField)
-        ReturnValue = self.ExecDirect(SqlStmt,,pQuiet,SQLDirect:ProcessResultSets)
-        if ReturnValue = UltimateSQL_Success
-            if self.AssignCurrentResultSet(1) = Level:Benign
-                pUpdateField = Self.GetColumnValue(pRow,pColumn)
-            end
+    clear(pUpdateField)
+    ReturnValue =  self.ExecDirect(SqlStmt,,pQuiet,SQLDirect:ProcessResultSets)
+    if ReturnValue = UltimateSQL_Success
+        if self.AssignCurrentResultSet(1) = Level:Benign
+            pUpdateField =  Self.GetColumnValue(pRow,pColumn)
         end
-        return ReturnValue
+    end
+    return ReturnValue
 !       
         
 UltimateSQLDirect.FreeAllResultSets     Procedure()
@@ -294,29 +307,23 @@ UltimateSQLDirect.FreeAllResultSets     Procedure()
 lCnt                                        LONG
 
     Code
-        
-        If NOT Self.ResultSets &= NULL
-            Loop lCnt = 1 To Records(Self.ResultSets)
-                Get(Self.ResultSets,lCnt)
-                If Not Self.ResultSets.ResultSet &= NULL
-                    Self.AssignCurrentResultSet()
-                    Self.FreeResultSet()
-                    If NOT Self.CurrentResultSet &= NULL
-                        Dispose(Self.CurrentResultSet)
-                    End
-                    If Not Self.ResultSets.ColumnDescriptions &= NULL
-                        Dispose(Self.ResultSets.ColumnDescriptions)
-                    End
-                End
-                If Not Self.ResultSets.Stmt &= NULL
-                    Dispose(Self.ResultSets.Stmt)
-                End
-                If Not Self.ResultSets.MessageQ &= NULL
-                    Dispose(Self.ResultSets.MessageQ)
+
+    If NOT Self.ResultSets &= NULL
+        Loop lCnt = 1 To Records(Self.ResultSets)
+            Get(Self.ResultSets,lCnt)
+            If Not Self.ResultSets.ResultSet &= NULL
+                Self.AssignCurrentResultSet()
+                Self.FreeResultSet()
+                If NOT Self.CurrentResultSet &= NULL
+                    Dispose(Self.CurrentResultSet)
                 End
             End
-            Free(Self.ResultSets)
+            Dispose(Self.ResultSets.ColumnDescriptions)
+            Dispose(Self.ResultSets.MessageQ)
+            Dispose(Self.ResultSets.Stmt)
         End
+        Free(Self.ResultSets)
+    End
 !
         
 UltimateSQLDirect.FreeResultRow         Procedure(SQLResultsRowQueueType pResultRowQ)
@@ -325,17 +332,11 @@ lCnt                                        LONG
 
     Code
         
-        Loop lCnt = 1 To Records(pResultRowQ)
-            Get(pResultRowQ,lCnt)
-            Do DisposeColumn
-        End
-        Free(pResultRowQ)
-!
-DisposeColumn                           Routine
-    
-    If NOT pResultRowQ.SQLColumnValue &= NULL
+    Loop lCnt = 1 To Records(pResultRowQ)
+        Get(pResultRowQ,lCnt)
         Dispose(pResultRowQ.SQLColumnValue)
     End
+    Free(pResultRowQ)
 !
     
 UltimateSQLDirect.FreeResultSet         Procedure()
@@ -344,15 +345,15 @@ lCnt                                        LONG
 
     Code
         
-        If Not Self.CurrentResultSet &= NULL
-            Loop lCnt = Records(Self.CurrentResultSet) To 1 By -1
-                Get(Self.CurrentResultSet,lCnt)
-                Do FreeResultRow
-            End
-            Free(Self.CurrentResultSet)
+    If Not Self.CurrentResultSet &= NULL
+        Loop lCnt = Records(Self.CurrentResultSet) To 1 By -1
+            Get(Self.CurrentResultSet,lCnt)
+            Do FreeResultRow
         End
+        Free(Self.CurrentResultSet)
+    End
 
-FreeResultRow                           Routine
+FreeResultRow                   Routine
     
     If Not Self.CurrentResultSet.SQLColumns &= Null
         Self.FreeResultRow(Self.CurrentResultSet.SQLColumns)
@@ -373,8 +374,8 @@ lCnt                                        LONG
 
     Code
         
-        Loop lCnt = 1 To Self.SQLColCount
-            hresult = usd_SQLDescribeCol(self.hstmt                                  |
+    Loop lCnt = 1 To Self.SQLColCount
+        hresult =  usd_SQLDescribeCol(self.hstmt                                  |
                 ,lCnt                                        |
                 ,Self.CurrentColumnDescriptor.SQLColumnName         |
                 ,SIZE(Self.CurrentColumnDescriptor.SQLColumnName)   |
@@ -384,110 +385,110 @@ lCnt                                        LONG
                 ,DecimalDigits                               |
                 ,Nullable)
                             
-            If hresult = UltimateSQL_Success OR hresult = UltimateSQL_Success_with_Info
-                Add(Self.CurrentColumnDescriptor)
-            Else
-                ReturnValue = Level:Notify
-                Self.GetLastError(UltimateSQL_HANDLE_STMT,Self.hstmt)
-                Break
-            End
-        End  
-        Return ReturnValue
+        If hresult = UltimateSQL_Success OR hresult = UltimateSQL_Success_with_Info
+            Add(Self.CurrentColumnDescriptor)
+        Else
+            ReturnValue =  Level:Notify
+            Self.GetLastError(UltimateSQL_HANDLE_STMT,Self.hstmt)
+            Break
+        End
+    End  
+    Return ReturnValue
 !       
         
 UltimateSQLDirect.GetColumnName         Procedure(LONG pColumn) !,String
 
     Code
         
-        Get(Self.CurrentColumnDescriptor,pColumn)
-        If ErrorCode()
-            Return ''
-        Else
-            Return Self.CurrentColumnDescriptor.SQLColumnName
-        End
+    Get(Self.CurrentColumnDescriptor,pColumn)
+    If ErrorCode()
+        Return ''
+    Else
+        Return Self.CurrentColumnDescriptor.SQLColumnName
+    End
 !
          
-UltimateSQLDirect.GetColumnNameOffset  Procedure(STRING pColumnName) !,LONG
-lCnt                                      long,auto
-RetVal                                    long(0)
-   Code
-   loop lCnt = 1 to records(Self.CurrentColumnDescriptor)
-      get(self.CurrentColumnDescriptor,lCnt)
-      if UPPER(self.CurrentColumnDescriptor.SQLColumnName) = UPPER(pColumnName)
-         RetVal = lCnt
-         break
-      end
-   end
-   return RetVal
+UltimateSQLDirect.GetColumnNameOffset   Procedure(STRING pColumnName) !,LONG
+lCnt                                        long,auto
+RetVal                                      long(0)
+    Code
+    loop lCnt = 1 to records(Self.CurrentColumnDescriptor)
+        get(self.CurrentColumnDescriptor,lCnt)
+        if UPPER(self.CurrentColumnDescriptor.SQLColumnName) = UPPER(pColumnName)
+            RetVal =  lCnt
+            break
+        end
+    end
+    return RetVal
 !
-UltimateSQLDirect.GetColumnValue Procedure(LONG pRow, LONG pCol) !,STRING 
+UltimateSQLDirect.GetColumnValue        Procedure(LONG pRow, LONG pCol) !,STRING 
 
-ColumnValue                         UltimateString
+ColumnValue                                 UltimateString
 
-   Code
+    Code
         
-   ColumnValue.Assign('')
-   Get(Self.CurrentResultSet,pRow)
-   If Not ErrorCode() AND NOT Self.CurrentResultSet.SQLColumns &= NULL
-      Get(Self.CurrentResultSet.SQLColumns,pCol)
-      If Not ErrorCode() AND NOT Self.CurrentResultSet.SQLColumns.SQLColumnValue &= NULL
-         ColumnValue.Assign(Self.CurrentResultSet.SQLColumns.SQLColumnValue)
-      End
-   End
-   Return ColumnValue.Get()
-!       
-UltimateSQLDirect.GetColumnValueByName Procedure(LONG pRow, STRING pColumnName) !,STRING 
-
-ColumnValue                         UltimateString
-lColumnOffset                             long,auto
-
-   Code
-   lColumnOffset = self.GetColumnNameOffset(pColumnName)
-   if lColumnOffset
-      Get(Self.CurrentResultSet,pRow)
-      If Not ErrorCode() AND NOT Self.CurrentResultSet.SQLColumns &= NULL
-         Get(Self.CurrentResultSet.SQLColumns,lColumnOffset)
-         If Not ErrorCode() AND NOT Self.CurrentResultSet.SQLColumns.SQLColumnValue &= NULL
+    ColumnValue.Assign('')
+    Get(Self.CurrentResultSet,pRow)
+    If Not ErrorCode() AND NOT Self.CurrentResultSet.SQLColumns &= NULL
+        Get(Self.CurrentResultSet.SQLColumns,pCol)
+        If Not ErrorCode() AND NOT Self.CurrentResultSet.SQLColumns.SQLColumnValue &= NULL
             ColumnValue.Assign(Self.CurrentResultSet.SQLColumns.SQLColumnValue)
-         End
-      End
-   end
-   Return ColumnValue.Get()
+        End
+    End
+    Return ColumnValue.Get()
+!       
+UltimateSQLDirect.GetColumnValueByName  Procedure(LONG pRow, STRING pColumnName) !,STRING 
+
+ColumnValue                                 UltimateString
+lColumnOffset                               long,auto
+
+    Code
+    lColumnOffset =  self.GetColumnNameOffset(pColumnName)
+    if lColumnOffset
+        Get(Self.CurrentResultSet,pRow)
+        If Not ErrorCode() AND NOT Self.CurrentResultSet.SQLColumns &= NULL
+            Get(Self.CurrentResultSet.SQLColumns,lColumnOffset)
+            If Not ErrorCode() AND NOT Self.CurrentResultSet.SQLColumns.SQLColumnValue &= NULL
+                ColumnValue.Assign(Self.CurrentResultSet.SQLColumns.SQLColumnValue)
+            End
+        End
+    end
+    Return ColumnValue.Get()
 !       
         
-UltimateSQLDirect.GetResultSetMessages          procedure(<String pSeperator>)!,string  
-Messages                                            UltimateString
-SeparatorChars                                      UltimateString
-lCnt                                                long
+UltimateSQLDirect.GetResultSetMessages  procedure(<String pSeperator>)!,string  
+Messages                                    UltimateString
+SeparatorChars                              UltimateString
+lCnt                                        long
     code
-      If Omitted(pSeperator)
-         SeparatorChars.Assign('|')
-      else
-         SeparatorChars.Assign(pSeperator)
-      end
-      if records(Self.ResultSets.MessageQ)
-         Loop lCnt = 1 To Records(Self.ResultSets.MessageQ)
+    If Omitted(pSeperator)
+        SeparatorChars.Assign('|')
+    else
+        SeparatorChars.Assign(pSeperator)
+    end
+    if records(Self.ResultSets.MessageQ)
+        Loop lCnt = 1 To Records(Self.ResultSets.MessageQ)
             Get(Self.ResultSets.MessageQ,lCnt)
             if not ERRORCODE()
-               If lCnt > 1
-                  Messages.Append(SeparatorChars.Get())
-               end
-               Messages.Append(Self.ResultSets.MessageQ.ErrorState & ' - ' & Clip(Self.ResultSets.MessageQ.ErrorMsg))
+                If lCnt > 1
+                    Messages.Append(SeparatorChars.Get())
+                end
+                Messages.Append(Self.ResultSets.MessageQ.ErrorState & ' - ' & Clip(Self.ResultSets.MessageQ.ErrorMsg))
             End
-         End
-      elsif records(Self.ErrorMsg)
-         Loop lCnt = 1 To Records(Self.ErrorMsg)
+        End
+    elsif records(Self.ErrorMsg)
+        Loop lCnt = 1 To Records(Self.ErrorMsg)
             Get(Self.ErrorMsg,lCnt)
             if not ERRORCODE()
-               If lCnt > 1
-                  Messages.Append(SeparatorChars.Get())
-               end
-               Messages.Append(Self.ErrorMsg.ErrorState & ' - ' & Clip(Self.ErrorMsg.ErrorMsg))
+                If lCnt > 1
+                    Messages.Append(SeparatorChars.Get())
+                end
+                Messages.Append(Self.ErrorMsg.ErrorState & ' - ' & Clip(Self.ErrorMsg.ErrorMsg))
             End
-         End
-      end
-      
-      Return Messages.Get()
+        End
+    end
+                      
+    Return Messages.Get()
 !
 UltimateSQLDirect.GetStmtForPresentation        Procedure(STRING pStmt) !,STRING,VIRTUAL
 
@@ -495,29 +496,29 @@ SubStmt                                             UltimateString
 
     Code
         
-        SubStmt.Assign(pStmt)
-        If SubStmt.Contains('<13,10>')
-            SubStmt.Split('<13,10>')
-            SubStmt.Assign(SubStmt.GetLine(1))
-        End
-        If SubStmt.Length() > 512
-            SubStmt.Assign(SubStmt.Sub(1,512))
-        End
-        Return SubStmt.Get()
+    SubStmt.Assign(pStmt)
+    If SubStmt.Contains('<13,10>')
+        SubStmt.Split('<13,10>')
+        SubStmt.Assign(SubStmt.GetLine(1))
+    End
+    If SubStmt.Length() > 512
+        SubStmt.Assign(SubStmt.Sub(1,512))
+    End
+    Return SubStmt.Get()
         
 !
 UltimateSQLDirect.InitializeResultSet   Procedure(STRING pStmt)
 
     Code
-        Self.FreeAllResultSets() 
-        Clear(Self.ResultSets)              
-        Self.ResultSets.ResultSet &= New(SQLResultsQueueType)
-        Self.ResultSets.ColumnDescriptions &= New(SQLResultsColumnDefType)
-        Self.ResultSets.MessageQ           &= NEW(SQLErrorMsgQType)
-        Self.ResultSets.Stmt               &= NEW(STRING(LEN(Clip(Left(pStmt)))))
-        Self.ResultSets.Stmt               = Clip(Left(pStmt))
-        Add(Self.ResultSets)
-        Self.AssignCurrentResultSet()
+    Self.FreeAllResultSets() 
+    Clear(Self.ResultSets)              
+    Self.ResultSets.ResultSet          &=  New(SQLResultsQueueType)
+    Self.ResultSets.ColumnDescriptions &=  New(SQLResultsColumnDefType)
+    Self.ResultSets.MessageQ           &=  NEW(SQLErrorMsgQType)
+    Self.ResultSets.Stmt               &=  NEW(STRING(LEN(Clip(Left(pStmt)))))
+    Self.ResultSets.Stmt                =  Clip(Left(pStmt))
+    Add(Self.ResultSets)
+    Self.AssignCurrentResultSet()
         
         
 !
@@ -525,17 +526,19 @@ UltimateSQLDirect.NumberOfResultSets    Procedure() !,LONG
 
     Code
         
-        Return Records(Self.ResultSets)
+    Return Records(Self.ResultSets)
         
 !
 UltimateSQLDirect.OpenConnection        Procedure(*FILE pFile)!,LONG
 
     code
         
-        RETURN Self.OpenConnection(Self.BuildConnectionFromOwner(pFile{Prop:Owner}),pFile{PROP:HENV},pFile{PROP:Handle})
+!!    RETURN Self.OpenConnection(Self.BuildConnectionFromOwner(pFile{Prop:Owner}),pFile{PROP:HENV},pFile{PROP:Handle})
+    RETURN Self.OpenConnection(Self.BuildConnectionFromOwner(pFile{Prop:Owner}))
         
 !  
-UltimateSQLDirect.OpenConnection        Procedure(String pConnectionStr, Long pHenv, Long pHwnd)!,LONG
+!UltimateSQLDirect.OpenConnection        Procedure(String pConnectionStr, Long pHenv, Long pHwnd)!,LONG
+UltimateSQLDirect.OpenConnection        Procedure(String pConnectionStr)!,LONG
 
 hresult                                     Short
 ReturnValue                                 Byte(Level:Benign)
@@ -545,450 +548,537 @@ cbCsOut                                     Short
 SQL_IS_UINTEGER                             LONG
 
 
-    Code                     
-        
-        If self.hstmt
-            Assert(0,'Connection already open')
-            Return Level:Benign
-        End
+desktopHnd                                  LONG
+retCode                                     SHORT
+lConnLength                                 LONG
+connRequest                                 STRING( 1024 )
 
-        self.henv = pHenv
-        self.hwnd = pHwnd
-      ConnectionStr = pConnectionStr
-        hresult = usd_SQLAllocHandle(UltimateSQL_HANDLE_DBC, self.henv, self.hdbc); 
-        If hresult = UltimateSQL_SUCCESS OR hresult = UltimateSQL_SUCCESS_WITH_INFO   
-            hresult = usd_SQLSetConnectAttr(SELF.Hdbc,SQL_COPT_SS_MARS_ENABLED,SQL_MARS_ENABLED_YES,SQL_IS_UINTEGER)
-            hresult = usd_SQLDriverConnect(self.hdbc,self.hwnd,ConnectionStr,Len(clip(ConnectionStr)),ConnStrInfo,Len(ConnStrInfo),cbCsOut,UltimateSQL_DRIVER_NOPROMPT)
-            If hresult = UltimateSQL_SUCCESS OR hresult = UltimateSQL_SUCCESS_WITH_INFO
-                hresult = usd_SQLAllocHandle(UltimateSQL_HANDLE_STMT, self.hdbc, self.hstmt)
-                If hresult = UltimateSQL_SUCCESS OR hresult = UltimateSQL_SUCCESS_WITH_INFO
-                    hresult = Self.SetAppRole()
-                    If hresult = UltimateSQL_SUCCESS OR hresult = UltimateSQL_SUCCESS_WITH_INFO
-                    Else
-                        Self.GetLastError(UltimateSQL_HANDLE_STMT,Self.hstmt)
-                        ReturnValue = Level:Notify
-                    End
-                Else
-                    Self.GetLastError(UltimateSQL_HANDLE_dbc,self.hdbc)
-                    ReturnValue = Level:Notify
-                End
-            Else          
-                Self.GetLastError(UltimateSQL_HANDLE_dbc,self.hdbc)
-                ReturnValue = Level:Notify
-            End
+    CODE         
+!!       ! original Rick Martin code
+!!    If self.hstmt
+!!!        Assert(0,'Connection already open')
+!!!        Return Level:Benign
+!!        SELF.Debug('was open!')
+!!        RETURN Level:Benign
+!!    End
+!!
+!!    self.henv     =  pHenv 
+!!    self.hwnd     =  usd_GetDesktopWindow()  !pHwnd
+!!    SELF.Debug('selfhenv ' & SELF.henv & '   hwnd ' & SELF.hwnd)
+!!    ConnectionStr =  pConnectionStr  
+!!!    IF NOT INRANGE( usd_SQLAllocHandle( UltimateSQL_HANDLE_ENV, UltimateSQL_NULL_HANDLE, SELF.henv ), UltimateSQL_SUCCESS, UltimateSQL_SUCCESS_WITH_INFO ) THEN RETURN UltimateSQL_ERROR END
+!!    
+!!    hresult       =  usd_SQLAllocHandle(UltimateSQL_HANDLE_DBC, self.henv, self.hdbc);  
+!!    SELF.Debug('hresult after sqlallochandle ' & hresult & '  selfhdbc ' & SELF.hdbc)
+!!    If hresult = UltimateSQL_SUCCESS OR hresult = UltimateSQL_SUCCESS_WITH_INFO   
+!!        hresult =  usd_SQLSetConnectAttr(SELF.Hdbc,SQL_COPT_SS_MARS_ENABLED,SQL_MARS_ENABLED_YES,SQL_IS_UINTEGER)
+!!        hresult =  usd_SQLDriverConnect(self.hdbc,self.hwnd,ConnectionStr,Len(clip(ConnectionStr)),ConnStrInfo,Len(ConnStrInfo),cbCsOut,UltimateSQL_DRIVER_NOPROMPT)
+!!        If hresult = UltimateSQL_SUCCESS OR hresult = UltimateSQL_SUCCESS_WITH_INFO
+!!            hresult =  usd_SQLAllocHandle(UltimateSQL_HANDLE_STMT, self.hdbc, self.hstmt)
+!!            If hresult = UltimateSQL_SUCCESS OR hresult = UltimateSQL_SUCCESS_WITH_INFO
+!!                hresult =  Self.SetAppRole()
+!!                If hresult = UltimateSQL_SUCCESS OR hresult = UltimateSQL_SUCCESS_WITH_INFO
+!!                Else
+!!                    Self.GetLastError(UltimateSQL_HANDLE_STMT,Self.hstmt)
+!!                    ReturnValue =  Level:Notify
+!!                End
+!!            Else
+!!                Self.GetLastError(UltimateSQL_HANDLE_dbc,self.hdbc)
+!!                ReturnValue =  Level:Notify
+!!            End
+!!        Else          
+!!            Self.GetLastError(UltimateSQL_HANDLE_dbc,self.hdbc)
+!!            ReturnValue =  Level:Notify
+!!        End
+!!    Else
+!!        Self.GetLastError(UltimateSQL_HANDLE_ENV,self.henv)
+!!        ReturnValue =  Level:Notify
+!!    End   
+!!    Return ReturnValue
+    
+    IF NOT INRANGE( usd_SQLAllocHandle( UltimateSQL_HANDLE_ENV, UltimateSQL_NULL_HANDLE, SELF.henv ), UltimateSQL_SUCCESS, UltimateSQL_SUCCESS_WITH_INFO ) THEN RETURN UltimateSQL_ERROR END
+    IF NOT INRANGE( usd_SQLSetEnvAttr( SELF.henv, UltimateSQL_ATTR_ODBC_VERSION, UltimateSQL_OV_ODBC3, UltimateSQL_IS_INTEGER ), UltimateSQL_SUCCESS, UltimateSQL_SUCCESS_WITH_INFO ) THEN RETURN UltimateSQL_ERROR END
+    IF NOT INRANGE( usd_SQLAllocHandle( UltimateSQL_HANDLE_DBC, SELF.henv, SELF.hdbc ), UltimateSQL_SUCCESS, UltimateSQL_SUCCESS_WITH_INFO ) THEN RETURN UltimateSQL_ERROR END
+    X# = usd_SQLSetConnectAttr(SELF.hdbc, 103, 5, 0 )
+    desktopHnd = usd_GetDesktopWindow()     
+    connRequest = pConnectionStr  
+    IF NOT INRANGE( usd_SQLDriverConnect( SELF.hdbc, desktopHnd, connRequest, |
+            LEN( CLIP(connRequest) ), ConnectionStr, LEN( CLIP(ConnectionStr) ), |
+            lConnLength, UltimateSQL_DRIVER_NOPROMPT ), UltimateSQL_SUCCESS, UltimateSQL_SUCCESS_WITH_INFO )
+        RETURN UltimateSQL_ERROR
+    END                                          
+    
+    X# = usd_SQLFreeHandle(UltimateSQL_HANDLE_ENV, SELF.henv )   
+                    
+    hresult =  usd_SQLAllocHandle(UltimateSQL_HANDLE_STMT, self.hdbc, self.hstmt)   
+    If hresult = UltimateSQL_SUCCESS OR hresult = UltimateSQL_SUCCESS_WITH_INFO
+        hresult =  Self.SetAppRole()
+        If hresult = UltimateSQL_SUCCESS OR hresult = UltimateSQL_SUCCESS_WITH_INFO
         Else
-            Self.GetLastError(UltimateSQL_HANDLE_ENV,self.henv)
-            ReturnValue = Level:Notify
-        End   
-        Return ReturnValue
+            Self.GetLastError(UltimateSQL_HANDLE_STMT,Self.hstmt)
+            ReturnValue =  Level:Notify
+        End
+    Else
+        Self.GetLastError(UltimateSQL_HANDLE_dbc,self.hdbc)
+        ReturnValue =  Level:Notify
+    End
+    
+    RETURN UltimateSQL_SUCCESS
+    
+    
+!!    If self.hstmt
+!!        Assert(0,'Connection already open')
+!!        Return Level:Benign
+!!    End
+!!
+!!    self.henv     =  pHenv
+!!    self.hwnd     =  usd_GetDesktopWindow()  !  pHwnd
+!!    ConnectionStr =  pConnectionStr
+!!    hresult       =  usd_SQLAllocHandle(UltimateSQL_HANDLE_DBC, self.henv, self.hdbc); 
+!!    If hresult = UltimateSQL_SUCCESS OR hresult = UltimateSQL_SUCCESS_WITH_INFO   
+!!        hresult =  usd_SQLSetConnectAttr(SELF.Hdbc,SQL_COPT_SS_MARS_ENABLED,SQL_MARS_ENABLED_YES,SQL_IS_UINTEGER)
+!!        hresult =  usd_SQLDriverConnect(self.hdbc,self.hwnd,ConnectionStr,Len(clip(ConnectionStr)),ConnStrInfo,Len(ConnStrInfo),cbCsOut,UltimateSQL_DRIVER_NOPROMPT)  
+!!        
+!!        If hresult = UltimateSQL_SUCCESS OR hresult = UltimateSQL_SUCCESS_WITH_INFO
+!!            hresult =  usd_SQLAllocHandle(UltimateSQL_HANDLE_STMT, self.hdbc, self.hstmt)   
+!!            If hresult = UltimateSQL_SUCCESS OR hresult = UltimateSQL_SUCCESS_WITH_INFO
+!!                hresult =  Self.SetAppRole()
+!!                If hresult = UltimateSQL_SUCCESS OR hresult = UltimateSQL_SUCCESS_WITH_INFO
+!!                Else
+!!                    Self.GetLastError(UltimateSQL_HANDLE_STMT,Self.hstmt)
+!!                    ReturnValue =  Level:Notify
+!!                End
+!!            Else
+!!                Self.GetLastError(UltimateSQL_HANDLE_dbc,self.hdbc)
+!!                ReturnValue =  Level:Notify
+!!            End
+!!        Else          
+!!            Self.GetLastError(UltimateSQL_HANDLE_dbc,self.hdbc)
+!!            ReturnValue =  Level:Notify
+!!        End  
+!!        
+!!    Else
+!!        Self.GetLastError(UltimateSQL_HANDLE_ENV,self.henv)
+!!        ReturnValue =  Level:Notify 
+!!        
+!!    End
+!!    
+!!    Return ReturnValue
         
 !
-UltimateSQLDirect.ProcessResultSet   PROCEDURE()!,LONG
-lFirstSet                         LONG(true)
-error_Return                      LONG
+UltimateSQLDirect.ProcessResultSet      PROCEDURE()!,LONG
+lFirstSet                                   LONG(true)
+error_Return                                LONG
 ReturnValue                                 LONG(UltimateSQL_Success)
 
-  Code
-        Loop            
-            If NOT lFirstSet   
-                Self.CurrentResult = usd_SQLMoreResults(Self.hstmt)
-                Case Self.CurrentResult
-                Of UltimateSQL_NO_DATA   
-                    BREAK
-                OF UltimateSQL_Success
-                OROF UltimateSQL_Success_with_Info
-                    Self.InitializeResultSet(Self.CurrentStmt)
-                ELSE
-                    Self.GetLastError(UltimateSQL_HANDLE_STMT,Self.hstmt)
-                    ReturnValue = UltimateSQL_Error
-                    Break
-                END        
+    Code
+    Loop            
+        If NOT lFirstSet   
+            Self.CurrentResult =  usd_SQLMoreResults(Self.hstmt)
+            Case Self.CurrentResult
+            Of UltimateSQL_NO_DATA   
+                BREAK
+            OF UltimateSQL_Success
+            OROF UltimateSQL_Success_with_Info
+                Self.InitializeResultSet(Self.CurrentStmt)
             ELSE
-                lFirstSet = false
-            END                  
-            
-            If Self.CurrentResult = UltimateSQL_Success_with_Info
-      !Process the diagnostic messages (these will be the PRINT statements plus anything else the driver returns
-                Self.ProcessNonErrorDiagnosticMsgs()
-                Self.AddMessagesToResultSet()
-            End          
-            
-    !Check to make sure there is an actual result set returned. The column count will be zero if there is no set.
-            error_Return = usd_SQLNumResultCols(Self.hstmt, Self.SQLColCount);
-            If error_Return = UltimateSQL_Error
                 Self.GetLastError(UltimateSQL_HANDLE_STMT,Self.hstmt)
-                ReturnValue = UltimateSQL_Error
+                ReturnValue =  UltimateSQL_Error
                 Break
-            End          
+            END        
+        ELSE
+            lFirstSet =  false
+        END                  
             
-    !Get Result Set
-            If Self.SQLColCount > 0 !Note we are only doing the SQLFetch if there is a result set
-                Loop While (Self.CurrentResult = UltimateSQL_Success OR Self.CurrentResult = UltimateSQL_Success_with_Info) 
-                    Self.CurrentResult = usd_SQLFetch(Self.hstmt)
-                    If Self.CurrentResult = UltimateSQL_Success OR Self.CurrentResult = UltimateSQL_Success_with_Info
-                        If Self.AddResultRow() <> Level:Benign
-                            ReturnValue = UltimateSQL_Error
-                            Break
-                        End
-                    ElsIf Self.CurrentResult = UltimateSQL_ERROR
-                        Self.GetLastError(UltimateSQL_HANDLE_STMT,Self.hstmt)
-                        Self.AddMessagesToResultSet()
-                        ReturnValue = UltimateSQL_Error
+        If Self.CurrentResult = UltimateSQL_Success_with_Info
+            !Process the diagnostic messages (these will be the PRINT statements plus anything else the driver returns
+            Self.ProcessNonErrorDiagnosticMsgs()
+            Self.AddMessagesToResultSet()
+        End          
+            
+        !Check to make sure there is an actual result set returned. The column count will be zero if there is no set.
+        error_Return =  usd_SQLNumResultCols(Self.hstmt, Self.SQLColCount);  
+        
+        If error_Return = UltimateSQL_Error
+            Self.GetLastError(UltimateSQL_HANDLE_STMT,Self.hstmt)
+            ReturnValue =  UltimateSQL_Error
+            Break
+        End          
+!        self.Debug('sqlcolcount ' & SELF.SQLColCount)    
+        !Get Result Set
+        If Self.SQLColCount > 0 !Note we are only doing the SQLFetch if there is a result set
+            Loop While (Self.CurrentResult = UltimateSQL_Success OR Self.CurrentResult = UltimateSQL_Success_with_Info) 
+                Self.CurrentResult =  usd_SQLFetch(Self.hstmt)
+                If Self.CurrentResult = UltimateSQL_Success OR Self.CurrentResult = UltimateSQL_Success_with_Info
+                    If Self.AddResultRow() <> Level:Benign
+                        ReturnValue =  UltimateSQL_Error
                         Break
                     End
-                End     
-            End
-        End   
-        RETURN ReturnValue
+                ElsIf Self.CurrentResult = UltimateSQL_ERROR
+                    Self.GetLastError(UltimateSQL_HANDLE_STMT,Self.hstmt)
+                    Self.AddMessagesToResultSet()
+                    ReturnValue =  UltimateSQL_Error
+                    Break
+                End
+            End     
+        End
+    End   
+    RETURN ReturnValue
         
 !
-UltimateSQLDirect.SaveResultsToCSV   Procedure(String pFileName) !,LONG
-AsciiOutput FILE,DRIVER('ASCII'),CREATE,PRE(OUT)
-Record  Record
-Output        STRING(65520)
-        End
-            End
-lCnt    LONG            
-  Code
-  AsciiOutput{Prop:Name} = pFileName
-  Create(AsciiOutput)
-  If ErrorCode()
-    Do HandleError
-  Else
-    Open(AsciiOutput)
+UltimateSQLDirect.SaveResultsToCSV      Procedure(String pFileName) !,LONG
+AsciiOutput                                 FILE,DRIVER('ASCII'),CREATE,PRE(OUT)
+Record                                          Record
+Output                                              STRING(65520)
+                                                End
+                                            End
+lCnt                                        LONG            
+    Code
+    AsciiOutput{Prop:Name} =  pFileName
+    Create(AsciiOutput)
     If ErrorCode()
-      Do HandleError
+        Do HandleError
     Else
-      Loop lCnt = 1 To Records(Self.ResultSets)
-        Get(Self.ResultSets,lCnt)
+        Open(AsciiOutput)
         If ErrorCode()
-          Break
+            Do HandleError
+        Else
+            Loop lCnt = 1 To Records(Self.ResultSets)
+                Get(Self.ResultSets,lCnt)
+                If ErrorCode()
+                    Break
+                End
+                Do WriteResultSet
+            End
+            Close(AsciiOutput)
         End
-        Do WriteResultSet
-      End
-      Close(AsciiOutput)
     End
-  End
-  Return Level:Benign
+    Return Level:Benign
 !
-WriteResultSet Routine
-  Data
+WriteResultSet                  Routine
+    Data
 lRowCnt LONG
 lColCnt LONG
-CSVOutput UltimateString
-  Code
-  If NOT Self.ResultSets.ResultSet &= NULL
-    If Pointer(Self.ResultSets) > 1
-      Do WriteBlankRow
+CSVOutput       UltimateString
+    Code
+    If NOT Self.ResultSets.ResultSet &= NULL
+        If Pointer(Self.ResultSets) > 1
+            Do WriteBlankRow
+        End
+        Do WriteStatementRow
+        Do WriteMessages
+        Do WriteColumnHeaderRow
+        Loop lRowCnt = 1 To Records(Self.ResultSets.ResultSet)
+            Get(Self.ResultSets.ResultSet,lRowCnt)
+            Do WriteResultRow
+        End
     End
-    Do WriteStatementRow
-    Do WriteMessages
-    Do WriteColumnHeaderRow
-    Loop lRowCnt = 1 To Records(Self.ResultSets.ResultSet)
-      Get(Self.ResultSets.ResultSet,lRowCnt)
-      Do WriteResultRow
-    End
-  End
 !  
-WriteResultRow  Routine
-  Data
+WriteResultRow                  Routine
+    Data
 lColCnt LONG
-CSVOutput UltimateString
-CleanColumnValue  UltimateString
-  Code
-  Loop lColCnt = 1 To Records(Self.ResultSets.ResultSet.SQLColumns)
-    Get(Self.ResultSets.ResultSet.SQLColumns,lColCnt)
-    If ErrorCode()
-      Cycle
-    End
-    If NOT Self.ResultSets.ResultSet.SQLColumns.SQLColumnValue &= NULL
-      CleanColumnValue.Assign(Self.ResultSets.ResultSet.SQLColumns.SQLColumnValue)
-      If CleanColumnValue.Contains('''')
-        CleanColumnValue.Assign('''' & CleanColumnValue.Get() & '''')
-      End
-      CSVOutput.Append(CleanColumnValue.Get() & ',')
-    Else
-      CSVOutput.Append(',')
-    End
-  End
-  If CSVOutput.Length() > 1
-    CSVOutput.Assign(CSVOutput.Sub(1,CSVOutput.Length()-1))
-  End
-  OUT:Output = CSVOutput.Get()
-  Do WriteRowToFile
-!  
-WriteColumnHeaderRow  Routine
-  Data
-lColCnt LONG
-CSVOutput UltimateString
-  Code
-  OUT:Output = 'Result Set: ' & Pointer(Self.ResultSets)
-  Do WriteRowToFile
-  If Not Self.ResultSets.ColumnDescriptions &= NULL
-    Loop lColCnt = 1 To Records(Self.ResultSets.ColumnDescriptions)
-      Get(Self.ResultSets.ColumnDescriptions,lColCnt)
-      If ErrorCode()
-        Cycle
-      End
-      CSVOutput.Append(Self.ResultSets.ColumnDescriptions.SQLColumnName & ',')
+CSVOutput       UltimateString
+CleanColumnValue        UltimateString
+    Code
+    Loop lColCnt = 1 To Records(Self.ResultSets.ResultSet.SQLColumns)
+        Get(Self.ResultSets.ResultSet.SQLColumns,lColCnt)
+        If ErrorCode()
+            Cycle
+        End
+        If NOT Self.ResultSets.ResultSet.SQLColumns.SQLColumnValue &= NULL
+            CleanColumnValue.Assign(Self.ResultSets.ResultSet.SQLColumns.SQLColumnValue)
+            If CleanColumnValue.Contains('''')
+                CleanColumnValue.Assign('''' & CleanColumnValue.Get() & '''')
+            End
+            CSVOutput.Append(CleanColumnValue.Get() & ',')
+        Else
+            CSVOutput.Append(',')
+        End
     End
     If CSVOutput.Length() > 1
-      CSVOutput.Assign(CSVOutput.Sub(1,CSVOutput.Length()-1))
+        CSVOutput.Assign(CSVOutput.Sub(1,CSVOutput.Length()-1))
     End
-    OUT:Output = CSVOutput.Get()
+    OUT:Output =  CSVOutput.Get()
     Do WriteRowToFile
-  End
-!
-WriteStatementRow Routine  
-  If NOT Self.ResultSets.Stmt &= NULL
-    OUT:Output = Self.GetStmtForPresentation(Self.ResultSets.Stmt)
-    Do WriteRowToFile
-  End
 !  
-WriteMessages Routine
-  Data
-lCnt  LONG  
-MessageString UltimateString
-  Code
-  Loop lCnt = 1 To Records(Self.ResultSets.MessageQ)
-    Get(Self.ResultSets.MessageQ,lCnt)
-    MessageString.Assign(Clip(Self.ResultSets.MessageQ.ErrorMsg))
-    If MessageString.Contains('''')
-      MessageString.Assign('''' & MessageString.Get() & '''')
-    End
-    OUT:Output = Self.ResultSets.MessageQ.ErrorState & ',' & MessageString.Get()
+WriteColumnHeaderRow            Routine
+    Data
+lColCnt LONG
+CSVOutput       UltimateString
+    Code
+    OUT:Output =  'Result Set: ' & Pointer(Self.ResultSets)
     Do WriteRowToFile
-  End
-  If Records(Self.ResultSets.MessageQ)
-    Do WriteBlankRow
-  End
+    If Not Self.ResultSets.ColumnDescriptions &= NULL
+        Loop lColCnt = 1 To Records(Self.ResultSets.ColumnDescriptions)
+            Get(Self.ResultSets.ColumnDescriptions,lColCnt)
+            If ErrorCode()
+                Cycle
+            End
+            CSVOutput.Append(Self.ResultSets.ColumnDescriptions.SQLColumnName & ',')
+        End
+        If CSVOutput.Length() > 1
+            CSVOutput.Assign(CSVOutput.Sub(1,CSVOutput.Length()-1))
+        End
+        OUT:Output =  CSVOutput.Get()
+        Do WriteRowToFile
+    End
 !
-WriteBlankRow Routine
-  Clear(OUT:Output)
-  Do WriteRowToFile
+WriteStatementRow               Routine  
+    If NOT Self.ResultSets.Stmt &= NULL
+        OUT:Output =  Self.GetStmtForPresentation(Self.ResultSets.Stmt)
+        Do WriteRowToFile
+    End
+!  
+WriteMessages                   Routine
+    Data
+lCnt    LONG  
+MessageString   UltimateString
+    Code
+    Loop lCnt = 1 To Records(Self.ResultSets.MessageQ)
+        Get(Self.ResultSets.MessageQ,lCnt)
+        MessageString.Assign(Clip(Self.ResultSets.MessageQ.ErrorMsg))
+        If MessageString.Contains('''')
+            MessageString.Assign('''' & MessageString.Get() & '''')
+        End
+        OUT:Output =  Self.ResultSets.MessageQ.ErrorState & ',' & MessageString.Get()
+        Do WriteRowToFile
+    End
+    If Records(Self.ResultSets.MessageQ)
+        Do WriteBlankRow
+    End
 !
-WriteRowToFile  Routine
-  Add(AsciiOutput)
-  If ErrorCode()
-    Do HandleError
-  End
+WriteBlankRow                   Routine
+    Clear(OUT:Output)
+    Do WriteRowToFile
 !
-HandleError Routine
-  If ErrorCode()
-    Message('Error creating SQL Result CSV File|' & Error() & ' (' & ErrorCode() & ')','Error',ICON:Asterisk)
-  End
+WriteRowToFile                  Routine
+    Add(AsciiOutput)
+    If ErrorCode()
+        Do HandleError
+    End
+!
+HandleError                     Routine
+    If ErrorCode()
+        Message('Error creating SQL Result CSV File|' & Error() & ' (' & ErrorCode() & ')','Error',ICON:Asterisk)
+    End
   
 !!
 !!
 !!
-UltimateSQLResultsViewClass.Construct               Procedure()
-  Code
-  Self.MaxColumns = 15
-  Self.DefaultColumnWidth = 45
+UltimateSQLResultsViewClass.Construct   Procedure()
+    Code
+    Self.MaxColumns         =  15
+    Self.DefaultColumnWidth =  45
 !  
-UltimateSQLResultsViewClass.DisplayResults   Procedure(UltimateSQLDirect pSQLDirect, <STRING pTitle>)
-ResultsWindow                                       WINDOW('SQL Results'),AT(,,491,297),CENTER,GRAY,SYSTEM, |
-                                                        FONT('Tahoma',8,,,CHARSET:DEFAULT),VSCROLL
+UltimateSQLResultsViewClass.DisplayResults      Procedure(UltimateSQLDirect pSQLDirect, <STRING pTitle>,<STRING pConnection>)
+ResultsWindow                                       WINDOW('SQL Results'),AT(,,491,297),CENTER,GRAY,SYSTEM,FONT('Segoe UI',8,,,CHARSET:DEFAULT),VSCROLL
+                                                        STRING(''),AT(3,2,355,17),USE(?STRING)
                                                         SHEET,AT(2,23,487,258),USE(?Sheet1)
                                                             TAB('Results'),USE(?tabResults)
-                                                                STRING('Statement'),AT(8,44,361,10),USE(?strStmt)
-                                                                LIST,AT(8,57,475,222),USE(?ResultsList),HVSCROLL,FORMAT('40L(2)*')
+                                                                TEXT,AT(8,44,475,36),USE(?strStmt),VSCROLL,FONT(,10)
+                                                                LIST,AT(8,86,475,193),USE(?ResultsList),HVSCROLL,FONT(,10),FORMAT('40L(2)*')
                                                             END
                                                             TAB('Messages'),USE(?tabMessages)
-                                                                TEXT,AT(7,41,477,235),USE(?MsgText),BOXED,VSCROLL,READONLY
+                                                                TEXT,AT(8,41,477,235),USE(?MsgText),BOXED,VSCROLL,READONLY
                                                             END
                                                         END
                                                         STRING('Total Number of Result Sets: '),AT(3,286),USE(?strNumResultSets),LEFT
-                                                        BUTTON('&Close'),AT(438,2,45,14),USE(?btnClose),SKIP,ICON('WACLOSE.ICO'), |
-                                                            DEFAULT,LEFT
-                                                        BUTTON('&Save'),AT(389,2,45,14),USE(?btnSave),SKIP,ICON('SAVE.ico'),LEFT
+                                                        BUTTON('Close'),AT(421,2,65,23),USE(?btnClose),SKIP,ICON('WACLOSE.ICO'),DEFAULT,LEFT
+                                                        BUTTON('Save'),AT(362,2,55,23),USE(?btnSave),SKIP,ICON('SAVE.ico'),LEFT
                                                     END
-lFEQ                                      LONG
-lStrFEQ                                   LONG
-lCnt                                      LONG
-lResultsFound                             LONG
-CurSQLResults                             &UltimateSQLResultsViewClass
-SQLResultsCL1                             UltimateSQLResultsViewClass
-SQLResultsCL2                             UltimateSQLResultsViewClass
-SQLResultsCL3                             UltimateSQLResultsViewClass
-SQLResultsCL4                             UltimateSQLResultsViewClass
-ResultsFileName                           CSTRING(FILE:MaxFilePath)
-  Code
-  Open(ResultsWindow)
-  If NOT Omitted(pTitle)
-    0{Prop:Text} = pTitle
-  END
-  Do CreateListControls
-  Do AddjustOtherControls
-  ?strNumResultSets{Prop:Text} = ?strNumResultSets{Prop:Text} & pSQLDirect.NumberOfResultSets()
-  If Not lResultsFound
-    ?Sheet1{Prop:Selected} = 2    !Select Message tab if no result sets
-  End
-  Accept
-    Case Event()
-    Of Event:Accepted
-      Case Field()
-      Of ?btnClose
-        Post(Event:CloseWindow)
-      Of ?btnSave
-        Do SaveResults
-      End
+lFEQ                                                LONG
+lStrFEQ                                             LONG
+lCnt                                                LONG
+lResultsFound                                       LONG
+CurSQLResults                                       &UltimateSQLResultsViewClass
+SQLResultsCL1                                       UltimateSQLResultsViewClass
+SQLResultsCL2                                       UltimateSQLResultsViewClass
+SQLResultsCL3                                       UltimateSQLResultsViewClass
+SQLResultsCL4                                       UltimateSQLResultsViewClass
+ResultsFileName                                     CSTRING(FILE:MaxFilePath)   
+
+    CODE               
+    
+    OPEN(ResultsWindow) 
+    If NOT Omitted(pConnection)
+        ?STRING{PROP:Text} = pConnection  
+    END
+    
+    If NOT Omitted(pTitle)
+        0{Prop:Text} =  pTitle
+    END     
+    
+    Do CreateListControls
+    Do AddjustOtherControls
+    ?strNumResultSets{Prop:Text} =  ?strNumResultSets{Prop:Text} & pSQLDirect.NumberOfResultSets()
+    If Not lResultsFound
+        ?Sheet1{Prop:Selected} =  2    !Select Message tab if no result sets
     End
-  End
-  Close(ResultsWindow)
-!
-CreateListControls  Routine
-  Data
-lCntMsg LONG
-  Code
-  Loop lCnt = 1 To 4
-    If pSQLDirect.AssignCurrentResultSet(lCnt) = Level:Benign
-      If Records(pSQLDirect.CurrentResultSet)
-        lResultsFound = true
-        Do AssignCurrentResultClass
-        CurSQLResults.CurrentResultSet        &= pSQLDirect.CurrentResultSet
-        CurSQLResults.CurrentColumnDescriptor &= pSQLDirect.CurrentColumnDescriptor
-        Do AssignListFEQ
-        lStrFEQ{Prop:Text} = pSQLDirect.GetStmtForPresentation(pSQLDirect.ResultSets.Stmt)
-        CurSQLResults.Init(lFEQ,pSQLDirect.CurrentResultSet,pSQLDirect.CurrentColumnDescriptor)
-      End
-      If Records(pSQLDirect.ResultSets.MessageQ)
-        if ?MsgText{Prop:Text}
-          ?MsgText{Prop:Text} = '<13,10>'
-        end
-        Loop lCntMsg = 1 To Records(pSQLDirect.ResultSets.MessageQ)
-          Get(pSQLDirect.ResultSets.MessageQ,lCntMsg)
-          ?MsgText{Prop:Text} = ?MsgText{Prop:Text} & pSQLDirect.ResultSets.MessageQ.ErrorState & ' - ' & Clip(pSQLDirect.ResultSets.MessageQ.ErrorMsg) & '<13,10>'
+    Accept
+        Case Event()
+        Of Event:Accepted
+            Case Field()
+            Of ?btnClose
+                Post(Event:CloseWindow)
+            Of ?btnSave
+                Do SaveResults
+            End
         End
-      End
-    Else
-      Break
     End
-  End
+    Close(ResultsWindow)
 !
-AddjustOtherControls    Routine
-  Data
-lAdjustment LONG
-  Code
-  lAdjustment    = ((lCnt-2) * (?ResultsList{Prop:Height} + 15))
-  0{Prop:Height} = 0{Prop:Height} + lAdjustment
-  ?Sheet1{Prop:Height} = ?Sheet1{Prop:Height} + lAdjustment
-  ?MsgText{Prop:Height} = ?MsgText{Prop:Height} + lAdjustment
-  ?btnClose{Prop:YPos} = ?btnClose{Prop:YPos} + lAdjustment
-  ?btnSave{Prop:YPos} = ?btnSave{Prop:YPos} + lAdjustment
-  ?strNumResultSets{Prop:YPos} = ?strNumResultSets{Prop:YPos} + lAdjustment
+CreateListControls              Routine
+    Data
+lCntMsg LONG
+    Code
+    Loop lCnt = 1 To 4
+        If pSQLDirect.AssignCurrentResultSet(lCnt) = Level:Benign
+            If Records(pSQLDirect.CurrentResultSet)
+                lResultsFound =  true
+                Do AssignCurrentResultClass
+                CurSQLResults.CurrentResultSet        &=  pSQLDirect.CurrentResultSet
+                CurSQLResults.CurrentColumnDescriptor &=  pSQLDirect.CurrentColumnDescriptor
+                Do AssignListFEQ
+                lStrFEQ{Prop:Text} =  pSQLDirect.GetStmtForPresentation(pSQLDirect.ResultSets.Stmt)
+                CurSQLResults.Init(lFEQ,pSQLDirect.CurrentResultSet,pSQLDirect.CurrentColumnDescriptor)
+            End
+            If Records(pSQLDirect.ResultSets.MessageQ)
+                if ?MsgText{Prop:Text}
+                    ?MsgText{Prop:Text} =  '<13,10>'
+                end
+                Loop lCntMsg = 1 To Records(pSQLDirect.ResultSets.MessageQ)
+                    Get(pSQLDirect.ResultSets.MessageQ,lCntMsg)
+                    ?MsgText{Prop:Text} =  ?MsgText{Prop:Text} & pSQLDirect.ResultSets.MessageQ.ErrorState & ' - ' & Clip(pSQLDirect.ResultSets.MessageQ.ErrorMsg) & '<13,10>'
+                End
+            End
+        Else
+            Break
+        End
+    End
 !
-AssignListFEQ       Routine
-  If lCnt = 1
-    lFEQ = ?ResultsList
-    lStrFEQ = ?strStmt
-  Else
-    lFEQ = Create(0,Create:List,?tabResults)
-    lStrFEQ = Create(0,Create:String,?tabResults)
-    Do AssignListPosition
-  End
+AddjustOtherControls            Routine
+    Data
+lAdjustment     LONG
+    Code
+    lAdjustment                  =  ((lCnt-2) * (?ResultsList{Prop:Height} + 15))
+    0{Prop:Height              } =  0{Prop:Height} + lAdjustment
+    ?Sheet1{Prop:Height        } =  ?Sheet1{Prop:Height} + lAdjustment
+    ?MsgText{Prop:Height       } =  ?MsgText{Prop:Height} + lAdjustment
+    ?btnClose{Prop:YPos        } =  ?btnClose{Prop:YPos} + lAdjustment
+    ?btnSave{Prop:YPos         } =  ?btnSave{Prop:YPos} + lAdjustment
+    ?strNumResultSets{Prop:YPos} =  ?strNumResultSets{Prop:YPos} + lAdjustment
 !
-AssignListPosition  Routine
-  lFEQ{Prop:YPos} = ?ResultsList{Prop:YPos} + ((lCnt-1) * (?ResultsList{Prop:Height} + 15))
-  lFEQ{Prop:XPos} = ?ResultsList{Prop:XPos}
-  lFEQ{Prop:Width} = ?ResultsList{Prop:Width}
-  lFEQ{Prop:Height} = ?ResultsList{Prop:Height}
-  lFEQ{Prop:VSCROLL} = 1
-  lFEQ{Prop:HSCROLL} = 1
-  lFEQ{Prop:Hide} = ''
-  lStrFEQ{Prop:yPos} = ?strStmt{Prop:yPos} + ((lCnt-1) * (?ResultsList{Prop:Height} + 15))
-  lStrFEQ{Prop:xPos} = ?strStmt{Prop:xPos}
-  lStrFEQ{Prop:Hide} = ''
+AssignListFEQ                   Routine
+    If lCnt = 1
+        lFEQ    =  ?ResultsList
+        lStrFEQ =  ?strStmt
+    Else
+        lFEQ    =  Create(0,Create:List,?tabResults)
+        lStrFEQ =  Create(0,Create:String,?tabResults)
+        Do AssignListPosition
+    End
 !
-AssignCurrentResultClass    Routine
-  Case lCnt
-  Of 1
-    CurSQLResults &= SQLResultsCL1
-  Of 2
-    CurSQLResults &= SQLResultsCL2
-  Of 3
-    CurSQLResults &= SQLResultsCL3
-  Of 4
-    CurSQLResults &= SQLResultsCL4
-  End
+AssignListPosition              Routine
+    lFEQ{Prop:YPos   } =  ?ResultsList{Prop:YPos} + ((lCnt-1) * (?ResultsList{Prop:Height} + 15))
+    lFEQ{Prop:XPos   } =  ?ResultsList{Prop:XPos}
+    lFEQ{Prop:Width  } =  ?ResultsList{Prop:Width}
+    lFEQ{Prop:Height } =  ?ResultsList{Prop:Height}
+    lFEQ{Prop:VSCROLL} =  1
+    lFEQ{Prop:HSCROLL} =  1
+    lFEQ{Prop:Hide   } =  ''
+    lStrFEQ{Prop:yPos} =  ?strStmt{Prop:yPos} + ((lCnt-1) * (?ResultsList{Prop:Height} + 15))
+    lStrFEQ{Prop:xPos} =  ?strStmt{Prop:xPos}
+    lStrFEQ{Prop:Hide} =  ''
 !
-SaveResults         Routine
-  DATA
+AssignCurrentResultClass        Routine
+    Case lCnt
+    Of 1
+        CurSQLResults &=  SQLResultsCL1
+    Of 2
+        CurSQLResults &=  SQLResultsCL2
+    Of 3
+        CurSQLResults &=  SQLResultsCL3
+    Of 4
+        CurSQLResults &=  SQLResultsCL4
+    End
+!
+SaveResults                     Routine
+    DATA
 !loc:GetDocuments SpecialFolder
-  CODE
+    CODE
   
 !  ResultsFileName = loc:GetDocuments.GetDir(SV:CSIDL_PERSONAL) & '\SQLResults.CSV'
-  ResultsFileName = 'SQLResults.CSV'
-  If FileDialog('Save SQL Results',ResultsFileName,'*.CSV',FILE:Save+FILE:KeepDir+FILE:LongName+FILE:AddExtension)
-    pSQLDirect.SaveResultsToCSV(ResultsFileName)
-  End
-  
-  
-UltimateSQLResultsViewClass.GetColumnName    Procedure(LONG pColumn) !,String
-  Code
-  Get(Self.CurrentColumnDescriptor,pColumn)
-  If ErrorCode()
-    Return ''
-  Else
-    Return Self.CurrentColumnDescriptor.SQLColumnName
-  End
-!  
-UltimateSQLResultsViewClass.GetListFormat           Procedure() !,STRING
-ListFormat  UltimateString
-lCnt        LONG
-  Code
-  Loop lCnt = 1 To Self.NumberOfListBoxColumns()
-    ListFormat.Append(Self.DefaultColumnWidth & 'L~' & Self.GetColumnName(lCnt) & '~@S255@|M')
-  End
-  Return ListFormat.Get()
-!  
-UltimateSQLResultsViewClass.Init                    PROCEDURE(SIGNED pFEQ, *SQLResultsQueueType pResultSet, *SQLResultsColumnDefType pColumnDescriptor)
-  Code
-  pFEQ{PROP:VLBval} = Address(Self)
-  pFEQ{PROP:VLBproc} = Address(Self.VLBproc)
-  pFEQ{Prop:Format} = Self.GetListFormat()
-  SELF.CurrentResultSet        &= pResultSet
-  SELF.CurrentColumnDescriptor &= pColumnDescriptor
-  SELF.ochanges = CHANGES(Self.CurrentResultSet)
-!
-UltimateSQLResultsViewClass.NumberOfListBoxColumns     Procedure() !,Long
-  Code
-  If Self.MaxColumns < Records(Self.CurrentColumnDescriptor)
-    Return Self.MaxColumns
-  Else
-    Return Records(Self.CurrentColumnDescriptor)
-  End
-!  
-UltimateSQLResultsViewClass.VLBproc                 PROCEDURE(LONG row, SHORT col) !,STRING
-nchanges LONG
-ReturnValue UltimateString
-  CODE
-  CASE row
-  OF -1                    ! How many rows?
-    ReturnValue.Assign(RECORDS(Self.CurrentResultSet))
-  OF -2                    ! How many columns?
-    ReturnValue.Assign(Self.NumberOfListBoxColumns())
-  OF -3                    ! Has it changed
-    nchanges = CHANGES(Self.CurrentResultSet)
-    IF nchanges <> SELF.ochanges THEN
-      SELF.ochanges = nchanges
-      ReturnValue.Assign(1)
-    ELSE
-      ReturnValue.Assign(0)
-    END
-  ELSE
-    GET(SELF.CurrentResultSet, row)
-    If SELF.CurrentResultSet.SQLColumns &= NULL
-      ReturnValue.Assign('')
-    Else
-      Get(SELF.CurrentResultSet.SQLColumns,Col)
-      If ErrorCode() OR SELF.CurrentResultSet.SQLColumns.SQLColumnValue &= NULL
-        ReturnValue.Assign('')
-      Else
-        ReturnValue.Assign(SELF.CurrentResultSet.SQLColumns.SQLColumnValue)
-      End
+    ResultsFileName =  'SQLResults.CSV'
+    If FileDialog('Save SQL Results',ResultsFileName,'*.CSV',FILE:Save+FILE:KeepDir+FILE:LongName+FILE:AddExtension)
+        pSQLDirect.SaveResultsToCSV(ResultsFileName)
     End
-  END
-  Return ReturnValue.Get()
+  
+  
+UltimateSQLResultsViewClass.GetColumnName       Procedure(LONG pColumn) !,String
+    Code
+    Get(Self.CurrentColumnDescriptor,pColumn)
+    If ErrorCode()
+        Return ''
+    Else
+        Return Self.CurrentColumnDescriptor.SQLColumnName
+    End
+!  
+UltimateSQLResultsViewClass.GetListFormat       Procedure() !,STRING
+ListFormat                                          UltimateString
+lCnt                                                LONG
+    Code
+    Loop lCnt = 1 To Self.NumberOfListBoxColumns()
+        ListFormat.Append(Self.DefaultColumnWidth & 'L~' & Self.GetColumnName(lCnt) & '~@S255@|M')
+    End
+    Return ListFormat.Get()
+!  
+UltimateSQLResultsViewClass.Init        PROCEDURE(SIGNED pFEQ, *SQLResultsQueueType pResultSet, *SQLResultsColumnDefType pColumnDescriptor)
+    Code
+    pFEQ{PROP:VLBval           }  =  Address(Self)
+    pFEQ{PROP:VLBproc          }  =  Address(Self.VLBproc)
+    pFEQ{Prop:Format           }  =  Self.GetListFormat()
+    SELF.CurrentResultSet        &=  pResultSet
+    SELF.CurrentColumnDescriptor &=  pColumnDescriptor
+    SELF.ochanges                 =  CHANGES(Self.CurrentResultSet)
+!
+UltimateSQLResultsViewClass.NumberOfListBoxColumns      Procedure() !,Long
+    Code
+    If Self.MaxColumns < Records(Self.CurrentColumnDescriptor)
+        Return Self.MaxColumns
+    Else
+        Return Records(Self.CurrentColumnDescriptor)
+    End
+!  
+UltimateSQLResultsViewClass.VLBproc     PROCEDURE(LONG row, SHORT col) !,STRING
+nchanges                                    LONG
+ReturnValue                                 UltimateString
+    CODE
+    CASE row
+    OF -1                    ! How many rows?
+        ReturnValue.Assign(RECORDS(Self.CurrentResultSet))
+    OF -2                    ! How many columns?
+        ReturnValue.Assign(Self.NumberOfListBoxColumns())
+    OF -3                    ! Has it changed
+        nchanges =  CHANGES(Self.CurrentResultSet)
+        IF nchanges <> SELF.ochanges THEN
+            SELF.ochanges =  nchanges
+            ReturnValue.Assign(1)
+        ELSE
+            ReturnValue.Assign(0)
+        END
+    ELSE
+        GET(SELF.CurrentResultSet, row)
+        If SELF.CurrentResultSet.SQLColumns &= NULL
+            ReturnValue.Assign('')
+        Else
+            Get(SELF.CurrentResultSet.SQLColumns,Col)
+            If ErrorCode() OR SELF.CurrentResultSet.SQLColumns.SQLColumnValue &= NULL
+                ReturnValue.Assign('')
+            Else
+                ReturnValue.Assign(SELF.CurrentResultSet.SQLColumns.SQLColumnValue)
+            End
+        End
+    END
+    Return ReturnValue.Get()
 
   

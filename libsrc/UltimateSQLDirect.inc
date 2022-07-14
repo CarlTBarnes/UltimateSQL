@@ -1,7 +1,7 @@
-  OMIT('_EndOfInclude_',_UltimateSQLDIRECTSupportPresent_)
-_UltimateSQLDIRECTSupportPresent_  EQUATE(1)
- Map
- End
+    OMIT('_EndOfInclude_',_UltimateSQLDIRECTSupportPresent_)
+_UltimateSQLDIRECTSupportPresent_       EQUATE(1)
+                                Map
+                                End
 
 !*****************************************************************************************************************
 !Copyright (C) 2007-2011 Rick Martin, rick.martin@upperparksolutions.com
@@ -16,78 +16,81 @@ _UltimateSQLDIRECTSupportPresent_  EQUATE(1)
 !3. This notice may not be removed or altered from any source distribution.
 !*****************************************************************************************************************
   
-  Include('UltimateSQLConnect.Inc'),ONCE
- 
-SQLResultsColumnDefType                 Queue,Type
-SQLColumnName                               CSTRING(101)
-SQLColumnType                               SHORT
-                                        End
-SQLResultsRowQueueType                  Queue,Type
-SQLColumnValue                              &STRING
-                                        End
-SQLResultsQueueType                     Queue,Type
-SQLColumns                                  &SQLResultsRowQueueType
-                                        End
-SQLResultsSetsQueueType                 Queue,Type
-ResultSet                                   &SQLResultsQueueType
-ColumnDescriptions                          &SQLResultsColumnDefType
-Stmt                                        &STRING
-MessageQ                                    &SQLErrorMsgQType
-                                        End  
+    Include('UltimateSQLConnect.Inc'),ONCE
+         
+  
+
+SQLResultsColumnDefType         Queue,Type
+SQLColumnName                       CSTRING(101)
+SQLColumnType                       SHORT
+                                End
+SQLResultsRowQueueType          Queue,Type
+SQLColumnValue                      &STRING
+                                End
+SQLResultsQueueType             Queue,Type
+SQLColumns                          &SQLResultsRowQueueType
+                                End
+SQLResultsSetsQueueType         Queue,Type
+ResultSet                           &SQLResultsQueueType
+ColumnDescriptions                  &SQLResultsColumnDefType
+Stmt                                &STRING
+MessageQ                            &SQLErrorMsgQType
+                                End  
 
 !  
-UltimateSQLDirect                       CLASS(UltimateSQLConnect),TYPE,MODULE('UltimateSQLDirect.CLW'),LINK('UltimateSQLDirect.CLW')  !,_UltimateSQLClassesLinkMode_),DLL(_UltimateSQLClassesDllMode_)
+UltimateSQLDirect               CLASS(UltimateSQLConnect),TYPE,MODULE('UltimateSQLDirect.CLW'),LINK('UltimateSQLDirect.CLW')  !,_UltimateSQLClassesLinkMode_),DLL(_UltimateSQLClassesDllMode_)
 !Attributes  
 
-SQLColCount                                 LONG
-StatementCompleted                          LONG
-CurrentStmt                                 &STRING
-ResultSets                                  &SQLResultsSetsQueueType
-CurrentResultSet                            &SQLResultsQueueType
-CurrentColumnDescriptor                     &SQLResultsColumnDefType
+SQLColCount                         LONG
+StatementCompleted                  LONG
+CurrentStmt                         &STRING
+ResultSets                          &SQLResultsSetsQueueType
+CurrentResultSet                    &SQLResultsQueueType
+CurrentColumnDescriptor             &SQLResultsColumnDefType
 !Methods
-AddMessagesToResultSet                      Procedure()
-AddResultRow                                Procedure(),LONG
-AssignCurrentResultSet                      Procedure()
-AssignCurrentResultSet                      Procedure(LONG pResultSet),LONG
-CancelStatement                             PROCEDURE()
-CloseConnection                             Procedure()
-Construct                                   Procedure()
-Destruct                                    Procedure() !Call Close connection if not closed
-ExecDirect                                  Procedure(String SqlStmt, LONG pFreeResults=1, LONG pQuiet=0, LONG pProcessResultSets=1),Byte,Proc
-ExecDirectContinue                          Procedure(LONG pProcessResultSets=1),Byte,Proc
-ExecDirectSingleValue                       Procedure(*? pUpdateField, String SqlStmt, long pRow=1, long pColumn=1, LONG pQuiet=0),LONG,proc
-FreeAllResultSets                           Procedure()
-FreeResultRow                               Procedure(SQLResultsRowQueueType pResultRowQ)
-FreeResultSet                               Procedure()
-GatherColumnInfo                            Procedure(),LONG
-GetColumnName                                Procedure(LONG pColumn),String
-GetColumnNameOffset                          Procedure(STRING pColumnName),LONG
-GetColumnValue                              Procedure(LONG pRow, LONG pCol),STRING
-GetColumnValueByName                        Procedure(LONG pRow, STRING pColumnName),STRING
-GetResultSetMessages                        procedure(<String pSeperator>),string  
-GetStmtForPresentation                      Procedure(STRING pStmt),STRING,VIRTUAL
-InitializeResultSet                         Procedure(STRING pStmt)
-NumberOfResultSets                          Procedure(),LONG
-OpenConnection                              Procedure(*FILE pFile),LONG
-OpenConnection                              Procedure(String connectionStr, Long pHenv, Long pHwnd),Byte
-ProcessResultSet                            PROCEDURE(),LONG
-SaveResultsToCSV                            Procedure(String pFileName) ,LONG,Proc
-                                        END
+AddMessagesToResultSet              Procedure()
+AddResultRow                        Procedure(),LONG
+AssignCurrentResultSet              Procedure()
+AssignCurrentResultSet              Procedure(LONG pResultSet),LONG
+CancelStatement                     PROCEDURE()
+CloseConnection                     Procedure()
+Construct                           Procedure()
+Destruct                            Procedure() !Call Close connection if not closed
+ExecDirect                          Procedure(String SqlStmt, LONG pFreeResults=1, LONG pQuiet=0, LONG pProcessResultSets=1),Byte,Proc
+ExecDirectContinue                  Procedure(LONG pProcessResultSets=1),Byte,Proc
+ExecDirectSingleValue               Procedure(*? pUpdateField, String SqlStmt, long pRow=1, long pColumn=1, LONG pQuiet=0),LONG,proc
+FreeAllResultSets                   Procedure()
+FreeResultRow                       Procedure(SQLResultsRowQueueType pResultRowQ)
+FreeResultSet                       Procedure()
+GatherColumnInfo                    Procedure(),LONG
+GetColumnName                       Procedure(LONG pColumn),String
+GetColumnNameOffset                 Procedure(STRING pColumnName),LONG
+GetColumnValue                      Procedure(LONG pRow, LONG pCol),STRING
+GetColumnValueByName                Procedure(LONG pRow, STRING pColumnName),STRING
+GetResultSetMessages                procedure(<String pSeperator>),string  
+GetStmtForPresentation              Procedure(STRING pStmt),STRING,VIRTUAL
+InitializeResultSet                 Procedure(STRING pStmt)
+NumberOfResultSets                  Procedure(),LONG
+OpenConnection                      Procedure(*FILE pFile),LONG
+!!OpenConnection                      Procedure(String connectionStr, Long pHenv, Long pHwnd),Byte
+OpenConnection                      Procedure(String connectionStr),Byte
+ProcessResultSet                    PROCEDURE(),LONG
+SaveResultsToCSV                    Procedure(String pFileName) ,LONG,Proc
+                                END
 
-UltimateSQLResultsViewClass             CLASS(),TYPE,MODULE('UltimateSQLDirect.CLW'),LINK('UltimateSQLDirect.CLW')  !,_UltimateSQLClassesLinkMode_),DLL(_UltimateSQLClassesDllMode_)
-MaxColumns                                  LONG
-DefaultColumnWidth                          LONG
-ochanges                                    LONG,PRIVATE
-CurrentResultSet                            &SQLResultsQueueType
-CurrentColumnDescriptor                     &SQLResultsColumnDefType
+UltimateSQLResultsViewClass     CLASS(),TYPE,MODULE('UltimateSQLDirect.CLW'),LINK('UltimateSQLDirect.CLW')  !,_UltimateSQLClassesLinkMode_),DLL(_UltimateSQLClassesDllMode_)
+MaxColumns                          LONG
+DefaultColumnWidth                  LONG
+ochanges                            LONG,PRIVATE
+CurrentResultSet                    &SQLResultsQueueType
+CurrentColumnDescriptor             &SQLResultsColumnDefType
 !
-Construct                                   Procedure()
-DisplayResults                              Procedure(UltimateSQLDirect pSQLDirect, <STRING pTitle>)
-GetColumnName                               Procedure(LONG pColumn),String
-GetListFormat                               Procedure(),STRING
-Init                                        PROCEDURE(SIGNED pfeq, *SQLResultsQueueType pResultSet, *SQLResultsColumnDefType pColumnDescriptor)
-NumberOfListBoxColumns                      Procedure() ,Long
-VLBproc                                     PROCEDURE(LONG row, SHORT col),STRING
-                                        End
- _EndOfInclude_
+Construct                           Procedure()
+DisplayResults                      Procedure(UltimateSQLDirect pSQLDirect, <STRING pTitle>,<STRING pConnection>)
+GetColumnName                       Procedure(LONG pColumn),String
+GetListFormat                       Procedure(),STRING
+Init                                PROCEDURE(SIGNED pfeq, *SQLResultsQueueType pResultSet, *SQLResultsColumnDefType pColumnDescriptor)
+NumberOfListBoxColumns              Procedure() ,Long
+VLBproc                             PROCEDURE(LONG row, SHORT col),STRING
+                                End
+    _EndOfInclude_
