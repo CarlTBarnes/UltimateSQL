@@ -13,6 +13,7 @@
 
               Map
                 MODULE('ODBC32')
+                  usd_GetDesktopWindow, LONG, PASCAL,Name('GetDesktopWindow')
                   usd_SQLAllocHandle  (SHORT,Long,*Long),SHORT,Pascal,Name('SQLAllocHandle')
                   usd_SQLSetEnvAttr   (Long,Long,LONG,Long),SHORT,Pascal,Name('SQLSetEnvAttr')
                   usd_SqlGetEnvAttr   (UNSIGNED,SHORT,*LONG,LONG,*LONG),SHORT,PASCAL,RAW,NAME('SqlGetEnvAttr')

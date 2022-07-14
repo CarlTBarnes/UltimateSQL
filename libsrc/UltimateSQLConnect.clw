@@ -43,7 +43,8 @@ UltimateSQLConnect.Construct            Procedure()
         
 !  
 UltimateSQLConnect.Destruct             Procedure()
-hresult                                      long,auto
+hresult                                     long,auto
+
     Code     
       If Self.hdbc
          hresult = usd_SQLDisconnect(Self.hdbc)
@@ -56,7 +57,8 @@ hresult                                      long,auto
       If NOT Self.ErrorMsg &= Null
          Dispose(Self.ErrorMsg)
       End
-!             
+      RETURN
+        
         
 UltimateSQLConnect.DummyMethod          Procedure()
 
@@ -202,7 +204,7 @@ lCnt                                        LONG
         Self.GetSQLMessages(HandleType, Handle)
         If Records(Self.ErrorMsg) AND Not Self.Quiet = SQLDirect:QuietModeTrue
             If Records(Self.ErrorMsg) = 1
-!                Message('Message: '&clip(Self.ErrorMsg.ErrorMsg)&'|Sqlstate: '&Clip(Self.ErrorMsg.ErrorState),'SQL Statement Error',Icon:Exclamation)
+            !    Message('Message: '&clip(Self.ErrorMsg.ErrorMsg)&'|Sqlstate: '&Clip(Self.ErrorMsg.ErrorState),'SQL Statement Error',Icon:Exclamation)
                 ErrorMessage = 'SQL Error: '& clip(Self.ErrorMsg.ErrorMsg) & '| Sqlstate: '& Clip(Self.ErrorMsg.ErrorState)
         
                 IF SELF.ErrorShowInDebugView  
