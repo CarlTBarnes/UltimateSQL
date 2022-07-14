@@ -13,7 +13,7 @@
   INCLUDE('EQUATES.CLW')  !for ICON: and BEEP: etc.
 ! INCLUDE('KeyCodes.CLW')
 
-  INCLUDE('UltimateSQLScripts.INC')
+  INCLUDE('UltimateSQLScripts.INC'),ONCE
 
   MAP
   END
@@ -523,105 +523,12 @@ UltimateSQLScripts.RemoveExtendedProperty       PROCEDURE()  !,STRING
 UltimateSQLScripts.GetExtendedProperty          PROCEDURE()  !,STRING
 
     CODE
-        
-    RETURN 'DECLARE @Object_Id          INTEGER, <13,10>' & |
-        '        @Object_Type        SYSNAME, <13,10>' & |
-        '        @Object_Name        SYSNAME, <13,10>' & |
-        '        @Property_Name      SYSNAME, <13,10>' & |
-        '        @Part1              SYSNAME, <13,10>' & |
-        '        @Part2              SYSNAME, <13,10>' & |
-        '        @Part3              SYSNAME, <13,10>' & |
-        '        @Part4              SYSNAME, <13,10>' & |
-        '        @Database_Name      SYSNAME, <13,10>' & |
-        '        @Schema_Name        SYSNAME, <13,10>' & |
-        '        @Schema_Object_Name SYSNAME, <13,10>' & |
-        '        @Column_Name        SYSNAME, <13,10>' & |
-        '        @ERR_MSG            VARCHAR(8000), <13,10>' & |
-        '        @ERR_STA            TINYINT, <13,10>' & |
-        '        @ERR_SEV            SMALLINT; <13,10>' & |
-        ' <13,10>' & |
-        'SET @Object_Name = <39>[OBJECTNAME]<39> <13,10>' & |
-        'SET @Property_Name = <39>[PROPERTYNAME]<39> <13,10>' & |
-        ' <13,10>' & |
-        'SELECT @Part1 = parsename(@Object_Name, 1) <13,10>' & |
-        '	 , @Part2 = parsename(@Object_Name, 2) <13,10>' & |
-        '	 , @Part3 = parsename(@Object_Name, 3) <13,10>' & |
-        '	 , @Part4 = parsename(@Object_Name, 4); <13,10>' & |
-        '	 <13,10>' & |
-        ' <13,10>' & |
-        'IF @Part1 IS NULL AND @Part2 IS NULL AND @Part3 IS NULL AND @Part4 IS NULL <13,10>' & |
-        'BEGIN -- @Object_Type is DATABASE <13,10>' & |
-        '	 <13,10>' & |
-        '		SELECT [SELECTOPERATION] FROM fn_listextendedproperty (@Property_Name,NULL, NULL, NULL, NULL, NULL, NULL) <13,10>' & |
-        '	 <13,10>' & |
-        'END <13,10>' & |
-        'ELSE <13,10>' & |
-        'IF @Part2 IS NULL AND @Part3 IS NULL AND @Part4 IS NULL <13,10>' & |
-        'BEGIN <13,10>' & |
-        '	SET @Object_Type = N<39>SCHEMA<39>; <13,10>' & |
-        '	SELECT @Schema_Name = @Part1; <13,10>' & |
-        '	    SELECT [SELECTOPERATION] FROM fn_listextendedproperty (@Property_Name,@Object_Type, @Schema_Name, NULL, NULL, NULL, NULL) <13,10>' & |
-        'END <13,10>' & |
-        'ELSE <13,10>' & |
-        'IF @Part3 IS NULL AND @Part4 IS NULL <13,10>' & |
-        'BEGIN <13,10>' & |
-        '	SET @Object_Id = object_id(@Object_Name); <13,10>' & |
-        '	SELECT @Object_Type = CASE <13,10>' & |
-        '							  WHEN type IN (N<39>U<39>, N<39>IT<39>, N<39>S<39>) THEN <13,10>' & |
-        '								  N<39>TABLE<39> <13,10>' & |
-        '							  WHEN type = N<39>V<39> THEN <13,10>' & |
-        '								  N<39>VIEW<39> <13,10>' & |
-        '							  WHEN type IN (N<39>P<39>, N<39>X<39>, N<39>PC<39>) THEN <13,10>' & |
-        '								  N<39>PROCEDURE<39> <13,10>' & |
-        '							  WHEN type = N<39>AF<39> THEN <13,10>' & |
-        '								  N<39>AGGREGATE<39> <13,10>' & |
-        '							  WHEN type IN (N<39>FT<39>, N<39>FN<39>, N<39>IF<39>, N<39>TF<39>) THEN <13,10>' & |
-        '								  N<39>FUNCTION<39> <13,10>' & |
-        '							  WHEN type = N<39>SN<39> THEN <13,10>' & |
-        '								  N<39>SYNONYM<39> <13,10>' & |
-        '							  WHEN type = N<39>SQ<39> THEN <13,10>' & |
-        '								  N<39>QUEUE<39> <13,10>' & |
-        '						  END <13,10>' & |
-        '		 , @Schema_Object_Name = @Part1 <13,10>' & |
-        '		 , @Schema_Name = @Part2 <13,10>' & |
-        '	FROM <13,10>' & |
-        '		sys.objects <13,10>' & |
-        '	WHERE <13,10>' & |
-        '		object_id = @Object_Id;	 		 <13,10>' & |
-        '		SELECT [SELECTOPERATION] FROM fn_listextendedproperty (@Property_Name,N<39>SCHEMA<39>, @Schema_Name, @Object_Type, @Schema_Object_Name, NULL, NULL) <13,10>' & |
-        '	 <13,10>' & |
-        'END <13,10>' & |
-        'ELSE <13,10>' & |
-        'IF @Part4 IS NULL <13,10>' & |
-        'BEGIN <13,10>' & |
-        '	SELECT @Column_Name = @Part1 <13,10>' & |
-        '		 , @Schema_Object_Name = @Part2 <13,10>' & |
-        '		 , @Schema_Name = @Part3; <13,10>' & |
-        ' <13,10>' & |
-        '	SET @Object_Id = object_id(N<39>[<39> + @Schema_Name + <39>].[<39> + @Schema_Object_Name + N<39>]<39>); <13,10>' & |
-        '	SELECT @Object_Type = CASE <13,10>' & |
-        '							  WHEN type IN (N<39>U<39>, N<39>IT<39>, N<39>S<39>) THEN <13,10>' & |
-        '								  N<39>TABLE<39> <13,10>' & |
-        '							  WHEN type = N<39>V<39> THEN <13,10>' & |
-        '								  N<39>VIEW<39> <13,10>' & |
-        '							  WHEN type IN (N<39>P<39>, N<39>X<39>, N<39>PC<39>) THEN <13,10>' & |
-        '								  N<39>PROCEDURE<39> <13,10>' & |
-        '							  WHEN type = N<39>AF<39> THEN <13,10>' & |
-        '								  N<39>AGGREGATE<39> <13,10>' & |
-        '							  WHEN type IN (N<39>FT<39>, N<39>FN<39>, N<39>IF<39>, N<39>TF<39>) THEN <13,10>' & |
-        '								  N<39>FUNCTION<39> <13,10>' & |
-        '							  WHEN type = N<39>SN<39> THEN <13,10>' & |
-        '								  N<39>SYNONYM<39> <13,10>' & |
-        '							  WHEN type = N<39>SQ<39> THEN <13,10>' & |
-        '								  N<39>QUEUE<39> <13,10>' & |
-        '						  END <13,10>' & |
-        '	FROM <13,10>' & |
-        '		sys.objects <13,10>' & |
-        '	WHERE <13,10>' & |
-        '		object_id = @Object_Id; <13,10>' & |
-        '		SELECT [SELECTOPERATION] FROM fn_listextendedproperty (@Property_Name,N<39>SCHEMA<39>, @Schema_Name, @Object_Type, @Schema_Object_Name, N<39>COLUMN<39>, @Column_Name) <13,10>' & |
-        '	 <13,10>' & |
-        'END'
+    
+   RETURN   'SELECT CAST(Value AS nvarchar(500)) AS [Version] <13,10>' & |
+            'FROM sys.extended_properties AS ep <13,10>' & |
+            'WHERE ep.major_id = OBJECT_ID(N<39>[OBJECTNAME]<39>) <13,10>' & |
+            'AND ep.name = N<39>[PROPERTYNAME]<39> AND ep.minor_id = 0;'
+    
 
 UltimateSQLScripts.DropAllDependencies          PROCEDURE()  !,STRING
 
