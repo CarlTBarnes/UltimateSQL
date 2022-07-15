@@ -1,0 +1,75 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{E9A14D14-A7AB-402C-A8B8-5A8A892B935E}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">Win32</Platform>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>UltimateSQLTest</RootNamespace>
+    <AssemblyName>UltimateSQLTest</AssemblyName>
+    <OutputName>UltimateSQLTest</OutputName>
+    <CWOutputType>Exe</CWOutputType>
+    <DefineConstants>StringTheoryLinkMode=&gt;1%3bStringTheoryDllMode=&gt;0%3bMD5=&gt;0%3b_ABCDllMode_=&gt;0%3b_ABCLinkMode_=&gt;1</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>Full</DebugType>
+    <vid>full</vid>
+    <check_stack>True</check_stack>
+    <check_index>True</check_index>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>False</DebugSymbols>
+    <DebugType>None</DebugType>
+    <vid>off</vid>
+    <check_stack>False</check_stack>
+    <check_index>False</check_index>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="UltimateSQLTest.clw">
+      <Generated>true</Generated>
+    </Compile>
+    <Compile Include="UltimateSQLTest001.clw">
+      <Generated>true</Generated>
+    </Compile>
+    <Compile Include="UltimateSQLTest002.clw">
+      <Generated>true</Generated>
+    </Compile>
+    <Compile Include="UltimateSQLTest003.clw">
+      <Generated>true</Generated>
+    </Compile>
+    <Compile Include="UltimateSQLTest004.clw">
+      <Generated>true</Generated>
+    </Compile>
+    <Compile Include="UltimateSQLTest005.clw">
+      <Generated>true</Generated>
+    </Compile>
+    <Compile Include="UltimateSQLTest006.clw">
+      <Generated>true</Generated>
+    </Compile>
+    <Compile Include="UltimateSQLTest007.clw">
+      <Generated>true</Generated>
+    </Compile>
+    <Compile Include="UltimateSQLTest008.clw">
+      <Generated>true</Generated>
+    </Compile>
+    <Compile Include="ULTIMATESQLTEST_BC.CLW">
+      <Generated>true</Generated>
+    </Compile>
+    <Compile Include="UltimateSQLTest_BC0.CLW">
+      <Generated>true</Generated>
+    </Compile>
+    <None Include="zlibwapi.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Generated>True</Generated>
+      <ProjectGenerated>True</ProjectGenerated>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FileDriver Include="MSSQL" />
+    <FileDriver Include="ODBC" />
+    <FileDriver Include="SQLite" />
+    <FileDriver Include="TOPSPEED" />
+    <Library Include="UltimateSQLTest.EXE.manifest" />
+  </ItemGroup>
+  <Import Project="$(ClarionBinPath)\SoftVelocity.Build.Clarion.targets" />
+</Project>

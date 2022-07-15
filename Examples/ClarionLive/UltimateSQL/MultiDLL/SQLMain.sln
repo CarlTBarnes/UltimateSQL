@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+# Clarion 2.1.0.2447
+Project("{12B76EC0-1D7B-4FA7-A7D0-C524288B48A1}") = "SQLMain", "SQLMain.cwproj", "{16D1494F-E153-4E7D-9654-91628A5882E2}"
+EndProject
+Project("{12B76EC0-1D7B-4FA7-A7D0-C524288B48A1}") = "SQLBase", "SQLBase.cwproj", "{2C346E06-1A7E-4488-953B-2BC207DDD074}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{{2150E333-8FDC-42A3-9474-1A3956D46DE8}}"
+	ProjectSection(SolutionItems) = postProject
+		SQLBase.app = SQLBase.app
+		SQLProcedures.app = SQLProcedures.app
+		SQLMain.app = SQLMain.app
+	EndProjectSection
+EndProject
+Project("{12B76EC0-1D7B-4FA7-A7D0-C524288B48A1}") = "SQLProcedures", "SQLProcedures.cwproj", "{5D064B21-CA93-472A-A940-5FB0D4821067}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{16D1494F-E153-4E7D-9654-91628A5882E2}.Debug|Win32.Build.0 = Debug|Win32
+		{16D1494F-E153-4E7D-9654-91628A5882E2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{16D1494F-E153-4E7D-9654-91628A5882E2}.Release|Win32.Build.0 = Release|Win32
+		{16D1494F-E153-4E7D-9654-91628A5882E2}.Release|Win32.ActiveCfg = Release|Win32
+		{2C346E06-1A7E-4488-953B-2BC207DDD074}.Debug|Win32.Build.0 = Debug|Win32
+		{2C346E06-1A7E-4488-953B-2BC207DDD074}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2C346E06-1A7E-4488-953B-2BC207DDD074}.Release|Win32.Build.0 = Release|Win32
+		{2C346E06-1A7E-4488-953B-2BC207DDD074}.Release|Win32.ActiveCfg = Release|Win32
+		{5D064B21-CA93-472A-A940-5FB0D4821067}.Debug|Win32.Build.0 = Debug|Win32
+		{5D064B21-CA93-472A-A940-5FB0D4821067}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5D064B21-CA93-472A-A940-5FB0D4821067}.Release|Win32.Build.0 = Release|Win32
+		{5D064B21-CA93-472A-A940-5FB0D4821067}.Release|Win32.ActiveCfg = Release|Win32
+	EndGlobalSection
+EndGlobal
