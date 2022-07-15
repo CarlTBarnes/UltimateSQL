@@ -1,0 +1,22 @@
+<AddIn name    = "Ultimate SQL"
+   author      = "ClarionLive"
+   url         = "http://www.clarionlive.com"
+   copyright   = "Copyright© 2020, ClarionLive, All Rights Reserved"
+   description = "Ultimate SQL">
+	<Manifest>
+		<Identity name="ClarionLiveUltimateSQL.Addin" version="22.2.22.1"/>
+		<Dependency addin = "clarionlive.addin"/>
+	</Manifest>
+	<BitmapResources file="..\resources\ClarionLive.resources" />
+	<Path name = "/SharpDevelop/Workbench/MainMenu/Help/Accessory/ClarionLive">
+			<MenuItem id = "CLSep" type = "Separator"/>
+			<MenuItem id = "UltimateSQLCHM"
+				  label = "Ultimate SQL Help"
+				  icon = "chm16x16"
+				  link = "home://accessory/documents/ClarionLive/UltimateSQL/UltimateSQL.chm"/>
+			<MenuItem id = "Ultimate SQL Examples"
+				  label = "Ultimate SQL Examples Folder"
+				  icon = "Icons.16x16.Folder"
+				  link = "home://accessory/examples/ClarionLive/UltimateSQL"/>			
+	</Path>
+</AddIn>

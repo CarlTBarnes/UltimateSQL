@@ -1,0 +1,23 @@
+<AddIn name    = "ClarionLive"
+   author      = "ClarionLive"
+   url         = "http://www.clarionlive.com"
+   copyright   = "Copyright© 2020, ClarionLive, All Rights Reserved"
+   description = "ClarionLive">
+	<Manifest>
+		<Identity name="ClarionLive.Addin" version="1.0"/>
+		<Dependency addin = "AccessoryMenu.Addin"/>
+	</Manifest>
+	<BitmapResources file="..\resources\ClarionLive.resources" />
+	<Path name = "/SharpDevelop/Workbench/MainMenu/Help/Accessory">
+		<MenuItem id = "ClarionLive" label = "ClarionLive" type = "Menu">
+			<MenuItem id = "ClarionLiveWebsite"
+			          label = "Home Page"
+			          icon = "Icons.16x16.HTMLIcon"
+			          link = "http://www.clarionlive.com/"/>
+	        <MenuItem id = "ClarionLiveYouTubeChannel"
+			          label = "YouTube Channel"
+			          icon = "Icons.16x16.HTMLIcon"
+			          link = "http://www.youtube.com/clarionlive"/>
+		</MenuItem>
+	</Path>
+</AddIn>
