@@ -1,0 +1,25 @@
+REM Batch to copy Ultimate SQL into all the proper Clarion Folders
+REM Written by Carl Barnes. Released under MIT License. Run at your own risk.
+
+REM 1. Rename this file from .TXT to .BAT so GitHub will not touch it
+REM 2. Edit the .BAT file lines below to have your Clarion install paths
+REM 3. For 1st test "SET NoPause=NO", then set back to =GO to not Pause
+REM 4. For 1st test add an EXIT after the first CALL Copy... to try just one
+REM 5. Save the BAT file and Run it to Test
+
+@echo off
+Echo+
+Echo Ready to copy UltimateSQL to my Clarion installs
+pause
+
+REM Set to "GO" so CopyToClarion.BAT will no pause to confirm 
+SET NoPause=GO
+
+CALL CopyUltSqlToClarion.BAT C:\Clarion9     %NoPause%
+CALL CopyUltSqlToClarion.BAT C:\Clarion9.1   %NoPause%
+CALL CopyUltSqlToClarion.BAT C:\Clarion10    %NoPause%
+CALL CopyUltSqlToClarion.BAT C:\Clarion11    %NoPause%
+CALL CopyUltSqlToClarion.BAT C:\Clarion11.1  %NoPause%
+Echo =====================================
+Echo Done calling CopyToClarion
+pause

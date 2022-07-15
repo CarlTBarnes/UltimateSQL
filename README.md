@@ -16,4 +16,6 @@ How to install:
 4. Copy Documents\*.* into X:\Clarion#\Accessory\Documents
 5. Copy Examples\*.*  into X:\Clarion#\Accessory\Examples
 
+The above copies can be done with the batch file: CopyUltSqlToClarion.BAT
+
 Demo folder appears to have been replaced by Examples folder. But it did have CustomerSampleData.sql file that is missing from Examples. Will delete Demno eventually.
